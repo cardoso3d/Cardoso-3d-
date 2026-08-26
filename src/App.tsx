@@ -7,6 +7,7 @@ import { motion } from 'motion/react';
 import { Instagram, Youtube, Twitch, Linkedin } from 'lucide-react';
 import ThreeDNaPose from './pages/ThreeDNaPose';
 import ZbrushDoZero from './pages/ZbrushDoZero';
+import capaZbrushImg from './assets/images/capa-zbrush-do-zero.png';
 
 const products = [
   {
@@ -19,8 +20,8 @@ const products = [
       "Método simples em etapas",
       "Garantia de 7 dias"
     ],
-    image: "/images/capa-zbrush-do-zero.png",
-    fallbackImage: "https://i.imgur.com/eNs0s4s.png",
+    image: capaZbrushImg,
+    fallbackImage: "https://3dnapose.com/wp-content/uploads/2026/05/Capa_zbrushdozero.webp",
     link: "/zbrushdozero",
     accent: "cardoso-amber",
     delay: 0.1
