@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@1,900&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Outfit", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-cardoso-black: #050505;
+  --color-cardoso-zinc: #0f0f12;
+  --color-cardoso-amber: #f59e0b;
+  --color-cardoso-sky: #0ea5e9;
+}
+
+@layer base {
+  html, body {
+    overflow-x: clip;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply bg-cardoso-black text-white font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight text-white uppercase;
+  }
+}
+
+.immersive-bg {
+  background: radial-gradient(circle at 20% 30%, #1a1a1a 0%, #050505 100%);
+}
+
+.card-glow-orange {
+  box-shadow: 0 0 80px -20px rgba(245, 158, 11, 0.2);
+}
+
+.card-glow-blue {
+  box-shadow: 0 0 80px -20px rgba(14, 165, 233, 0.2);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-600;
+}
+
+.vertical-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}

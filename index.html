@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      // Early suppression of third-party / cross-origin script errors
+      window.onerror = function (message, url, line, col, error) {
+        if (message === 'Script error.' || !url || url.includes('cardoso3d.com') || url.includes('youtube.com') || url.includes('ytimg.com')) {
+          console.warn('Ignored cross-origin script error:', message, url);
+          return true; // prevents the firing of the default error handler
+        }
+        return false;
+      };
+      window.addEventListener('unhandledrejection', function (event) {
+        if (event.reason && (event.reason.message === 'Script error.' || event.reason.message?.includes('Script error'))) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }, true);
+    </script>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s);j.async=true;j.src="https://api.cardoso3d.com/4c2eqkfstmrnk.js?"+i;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','g=AgpPKiA%2BSztZVipVJjc%2BTR1TQENFVQIFVg0THxAcFQRYClwOGx4%3D');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="https://3dnapose.com/wp-content/uploads/2025/05/Group-35-300x300.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cardoso 3D</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
