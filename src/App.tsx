@@ -19,7 +19,8 @@ const products = [
       "Método simples em etapas",
       "Garantia de 7 dias"
     ],
-    image: "https://3dnapose.com/wp-content/uploads/2026/05/Capa_zbrushdozero.webp",
+    image: "/images/capa-zbrush-do-zero.png",
+    fallbackImage: "https://i.imgur.com/eNs0s4s.png",
     link: "/zbrushdozero",
     accent: "cardoso-amber",
     delay: 0.1
@@ -55,6 +56,7 @@ function Home() {
             description={product.description}
             features={product.features}
             image={product.image}
+            fallbackImage={product.fallbackImage}
             link={product.link}
             accent={product.accent}
             delay={product.delay}

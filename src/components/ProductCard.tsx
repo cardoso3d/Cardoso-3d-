@@ -10,17 +10,23 @@ interface ProductCardProps {
   description: string;
   features: string[];
   image: string;
+  fallbackImage?: string;
   link: string;
   accent: string;
   delay: number;
   initials: string;
 }
 
-export default function ProductCard({ id, title, description, features, image, link, accent, delay, initials }: ProductCardProps) {
+export default function ProductCard({ id, title, description, features, image, fallbackImage, link, accent, delay, initials }: ProductCardProps) {
+  const [imgSrc, setImgSrc] = React.useState(image);
   const isAmber = accent.includes('amber') || accent.includes('accent');
   const glowClass = isAmber ? 'card-glow-orange' : 'card-glow-blue';
   const textAccentClass = isAmber ? 'text-cardoso-amber' : 'text-cardoso-sky';
   const bgAccentClass = isAmber ? 'bg-cardoso-amber' : 'bg-cardoso-sky';
+
+  React.useEffect(() => {
+    setImgSrc(image);
+  }, [image]);
 
   return (
     <motion.div
@@ -36,8 +42,14 @@ export default function ProductCard({ id, title, description, features, image, l
       {/* Image Overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src={image} 
+          src={imgSrc} 
           alt={title} 
+          referrerPolicy="no-referrer"
+          onError={() => {
+            if (fallbackImage && imgSrc !== fallbackImage) {
+              setImgSrc(fallbackImage);
+            }
+          }}
           className="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-1000" 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-cardoso-black/90 via-cardoso-black/20 to-transparent" />

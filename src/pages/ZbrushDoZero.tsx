@@ -163,13 +163,13 @@ const STYLES = `
   #zdz .about-bio p { font-family: var(--n); font-size: 16px; color: var(--muted); line-height: 1.6; margin: 0; }
   #zdz .about-bio p.lead { font-family: var(--n); font-size: 19px; font-style: normal; color: var(--ink); font-weight: 600; line-height: 1.5; }
   #zdz .about-collab { font-family: var(--n); font-size: 12px; font-weight: 600; color: var(--purpleHi); letter-spacing: 0.1em; text-transform: uppercase; padding-top: 20px; border-top: 1px solid var(--border); line-height: 1.5; }
-  #zdz .port-wrap { margin-top: 80px; overflow: hidden; position: relative; width: 100%; display: flex; }
-  #zdz .port-track { display: flex; gap: 16px; width: max-content; animation: zdzPortScroll 45s linear infinite; }
-  #zdz .port-wrap:hover .port-track { animation-play-state: paused; }
-  #zdz .port-item { width: 320px; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; cursor: zoom-in; position: relative; border: 1px solid var(--border); background: #140820; }
-  #zdz .port-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; }
+  #zdz .port-wrap { margin-top: 80px; overflow-x: auto; overflow-y: hidden; position: relative; width: 100%; display: flex; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; cursor: grab; user-select: none; }
+  #zdz .port-wrap::-webkit-scrollbar { display: none; }
+  #zdz .port-wrap.is-dragging { cursor: grabbing; scroll-behavior: auto; }
+  #zdz .port-track { display: flex; gap: 16px; width: max-content; }
+  #zdz .port-item { width: 320px; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid var(--border); background: #140820; flex-shrink: 0; user-select: none; }
+  #zdz .port-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; pointer-events: none; -webkit-user-drag: none; }
   #zdz .port-item:hover img { transform: scale(1.05); }
-  @keyframes zdzPortScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
   /* Lightbox */
   #zdz .lightbox { position: fixed; inset: 0; background: rgba(10,6,18,0.96); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(8px); }
@@ -304,6 +304,7 @@ const STYLES = `
     #zdz .price-head{padding:32px 20px 20px;}
     #zdz .price-amt, #zdz .price-feats{padding:32px 20px;}
     #zdz .price-feats li{font-size:13px; padding:10px 0;}
+    #zdz .port-item{width:260px;}
     #zdz .hero-img{width:100%; margin-top:32px;}
     #zdz .marquee .row{font-size:20px; gap:24px;}
     #zdz .player-cover-play{width:42px !important;height:42px !important;box-shadow:0 0 0 5px rgba(230,51,168,0.15), 0 0 20px var(--magenta) !important;}
@@ -820,6 +821,14 @@ export default function ZbrushDoZero() {
   const controlsTimeoutRef = useRef<any>(null);
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
 
+  // Portfolio carousel interactive drag & touch refs
+  const portWrapRef = useRef<HTMLDivElement | null>(null);
+  const isDraggingPort = useRef(false);
+  const startXPort = useRef(0);
+  const scrollLeftPort = useRef(0);
+  const hasDraggedPort = useRef(false);
+  const portPausedRef = useRef(false);
+
   useEffect(() => {
     // 1. Check if YT already ready
     if ((window as any).YT && (window as any).YT.Player) {
@@ -1084,6 +1093,118 @@ export default function ZbrushDoZero() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => { obs.disconnect(); window.removeEventListener('scroll', onScroll) }
   }, [])
+
+  // Interactive Infinite Carousel Effect
+  useEffect(() => {
+    const wrap = portWrapRef.current;
+    if (!wrap) return;
+
+    let animId: number;
+    const speed = 0.8; // px per frame
+
+    const tick = () => {
+      if (!portPausedRef.current && !isDraggingPort.current && wrap) {
+        wrap.scrollLeft += speed;
+        // Infinite wrap check: if reached half way (after first copy of images), reset seamlessly
+        const maxScroll = (wrap.scrollWidth - wrap.clientWidth) / 2;
+        if (maxScroll > 0 && wrap.scrollLeft >= maxScroll) {
+          wrap.scrollLeft -= maxScroll;
+        }
+      }
+      animId = requestAnimationFrame(tick);
+    };
+
+    animId = requestAnimationFrame(tick);
+
+    return () => {
+      cancelAnimationFrame(animId);
+    };
+  }, []);
+
+  const handlePortMouseDown = (e: React.MouseEvent) => {
+    const wrap = portWrapRef.current;
+    if (!wrap) return;
+    isDraggingPort.current = true;
+    hasDraggedPort.current = false;
+    portPausedRef.current = true;
+    startXPort.current = e.pageX - wrap.offsetLeft;
+    scrollLeftPort.current = wrap.scrollLeft;
+    wrap.classList.add('is-dragging');
+  };
+
+  const handlePortMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingPort.current) return;
+    const wrap = portWrapRef.current;
+    if (!wrap) return;
+    e.preventDefault();
+    const x = e.pageX - wrap.offsetLeft;
+    const walk = (x - startXPort.current) * 1.5;
+    if (Math.abs(walk) > 5) {
+      hasDraggedPort.current = true;
+    }
+    wrap.scrollLeft = scrollLeftPort.current - walk;
+
+    // Boundary wrap
+    const halfWidth = wrap.scrollWidth / 2;
+    if (wrap.scrollLeft <= 0) {
+      wrap.scrollLeft += halfWidth;
+      scrollLeftPort.current += halfWidth;
+    } else if (wrap.scrollLeft >= halfWidth) {
+      wrap.scrollLeft -= halfWidth;
+      scrollLeftPort.current -= halfWidth;
+    }
+  };
+
+  const handlePortMouseUp = () => {
+    isDraggingPort.current = false;
+    const wrap = portWrapRef.current;
+    if (wrap) {
+      wrap.classList.remove('is-dragging');
+    }
+    // Briefly keep paused before resuming smooth flow
+    setTimeout(() => {
+      portPausedRef.current = false;
+    }, 1200);
+  };
+
+  const handlePortTouchStart = (e: React.TouchEvent) => {
+    const wrap = portWrapRef.current;
+    if (!wrap) return;
+    isDraggingPort.current = true;
+    hasDraggedPort.current = false;
+    portPausedRef.current = true;
+    startXPort.current = e.touches[0].pageX - wrap.offsetLeft;
+    scrollLeftPort.current = wrap.scrollLeft;
+  };
+
+  const handlePortTouchMove = (e: React.TouchEvent) => {
+    if (!isDraggingPort.current) return;
+    const wrap = portWrapRef.current;
+    if (!wrap) return;
+    const x = e.touches[0].pageX - wrap.offsetLeft;
+    const walk = (x - startXPort.current) * 1.2;
+    if (Math.abs(walk) > 5) {
+      hasDraggedPort.current = true;
+    }
+    wrap.scrollLeft = scrollLeftPort.current - walk;
+
+    // Boundary wrap
+    const halfWidth = wrap.scrollWidth / 2;
+    if (wrap.scrollLeft <= 0) {
+      wrap.scrollLeft += halfWidth;
+      scrollLeftPort.current += halfWidth;
+    } else if (wrap.scrollLeft >= halfWidth) {
+      wrap.scrollLeft -= halfWidth;
+      scrollLeftPort.current -= halfWidth;
+    }
+  };
+
+  const handlePortTouchEnd = () => {
+    isDraggingPort.current = false;
+    setTimeout(() => {
+      portPausedRef.current = false;
+    }, 1500);
+  };
 
   return (
     <>
@@ -1382,12 +1503,36 @@ export default function ZbrushDoZero() {
               </div>
             </div>
             
-            {/* Infinite Portfolio Carousel */}
-            <div className="port-wrap rv">
+            {/* Infinite Portfolio Carousel with Touch and Drag */}
+            <div 
+              className="port-wrap rv"
+              ref={portWrapRef}
+              onMouseDown={handlePortMouseDown}
+              onMouseMove={handlePortMouseMove}
+              onMouseUp={handlePortMouseUp}
+              onMouseLeave={handlePortMouseUp}
+              onTouchStart={handlePortTouchStart}
+              onTouchMove={handlePortTouchMove}
+              onTouchEnd={handlePortTouchEnd}
+              onMouseEnter={() => { portPausedRef.current = true; }}
+              onMouseOut={(e) => { 
+                if (!isDraggingPort.current && !e.currentTarget.contains(e.relatedTarget as Node)) {
+                  portPausedRef.current = false; 
+                }
+              }}
+            >
               <div className="port-track">
                 {portImgs.concat(portImgs).map((img, i) => (
-                  <div key={i} className="port-item" onClick={() => setLbImg(img)}>
-                    <img src={img} alt={`Trabalho ${i + 1}`} loading="lazy" />
+                  <div 
+                    key={i} 
+                    className="port-item" 
+                    onClick={() => {
+                      if (!hasDraggedPort.current) {
+                        setLbImg(img);
+                      }
+                    }}
+                  >
+                    <img src={img} alt={`Trabalho ${(i % portImgs.length) + 1}`} loading="lazy" />
                   </div>
                 ))}
               </div>
