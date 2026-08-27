@@ -1,5 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Play, Pause, Volume2, VolumeX, Volume1, ChevronDown, X } from 'lucide-react'
+import { buildZdzCheckoutUrl } from '../utils/tracking'
+
+const WistiaPlayer = 'wistia-player' as any;
 
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap');
@@ -163,10 +166,13 @@ const STYLES = `
   #zdz .about-bio p { font-family: var(--n); font-size: 16px; color: var(--muted); line-height: 1.6; margin: 0; }
   #zdz .about-bio p.lead { font-family: var(--n); font-size: 19px; font-style: normal; color: var(--ink); font-weight: 600; line-height: 1.5; }
   #zdz .about-collab { font-family: var(--n); font-size: 12px; font-weight: 600; color: var(--purpleHi); letter-spacing: 0.1em; text-transform: uppercase; padding-top: 20px; border-top: 1px solid var(--border); line-height: 1.5; }
-  #zdz .port-wrap { margin-top: 80px; overflow-x: auto; overflow-y: hidden; position: relative; width: 100%; display: flex; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; cursor: grab; user-select: none; }
-  #zdz .port-wrap::-webkit-scrollbar { display: none; }
-  #zdz .port-wrap.is-dragging { cursor: grabbing; scroll-behavior: auto; }
-  #zdz .port-track { display: flex; gap: 16px; width: max-content; }
+  #zdz .port-wrap { margin-top: 80px; overflow: hidden; position: relative; width: 100%; display: flex; user-select: none; }
+  #zdz .port-track { display: flex; gap: 16px; width: max-content; animation: zdzPortMarquee 40s linear infinite; will-change: transform; }
+  #zdz .port-wrap:hover .port-track { animation-play-state: paused; }
+  @keyframes zdzPortMarquee {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-50%, 0, 0); }
+  }
   #zdz .port-item { width: 320px; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid var(--border); background: #140820; flex-shrink: 0; user-select: none; }
   #zdz .port-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; pointer-events: none; -webkit-user-drag: none; }
   #zdz .port-item:hover img { transform: scale(1.05); }
@@ -376,7 +382,7 @@ const STYLES = `
   }
   @media(min-width:901px){.zdz-cta{display:none;}}
 
-  /* Custom premium player styles */
+  /* Wistia Native Player container */
   #zdz .player-container {
     position: relative;
     width: 100%;
@@ -384,47 +390,55 @@ const STYLES = `
     background: #000;
     overflow: hidden;
     border-radius: 16px;
-    touch-action: pan-y;
+  }
+  #zdz wistia-player[media-id='e31bqnp5t3'] {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+  #zdz wistia-player[media-id='e31bqnp5t3']:not(:defined) {
+    background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/e31bqnp5t3/swatch');
+    display: block;
+    filter: blur(5px);
+    padding-top: 56.25%;
   }
   #zdz .player-unmute-overlay {
     position: absolute;
-    top: 20px;
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    z-index: 20;
+    transform: translate(-50%, -50%);
+    z-index: 25;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 12px 28px;
+    gap: 16px;
+    padding: 16px 36px;
     background: rgba(10, 6, 18, 0.94);
     border: 2px solid var(--magenta);
     border-radius: 999px;
-    box-shadow: 0 0 30px rgba(230, 51, 168, 0.5), 0 8px 32px rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(12px);
+    box-shadow: 0 0 30px rgba(230, 51, 168, 0.5), 0 8px 32px rgba(0, 0, 0, 0.8);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    animation: zdzPulseSound 1.8s infinite;
+    animation: zdzAttractSound 2.4s ease-in-out infinite;
     max-width: 92%;
     user-select: none;
-    touch-action: pan-y;
+    touch-action: manipulation;
+    will-change: transform;
   }
   #zdz .player-unmute-overlay:hover {
-    transform: translateX(-50%) scale(1.05);
-    box-shadow: 0 0 45px rgba(230, 51, 168, 0.85), 0 12px 40px rgba(0, 0, 0, 0.9);
+    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow: 0 0 40px rgba(230, 51, 168, 0.8), 0 12px 36px rgba(0, 0, 0, 0.9);
   }
-  @keyframes zdzPulseSound {
+  @keyframes zdzAttractSound {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(230, 51, 168, 0.4), 0 4px 20px rgba(0,0,0,0.5);
-      border-color: var(--magenta);
+      transform: translate(-50%, -50%) scale(1);
     }
     50% {
-      box-shadow: 0 0 40px rgba(230, 51, 168, 0.9), 0 8px 32px rgba(0,0,0,0.8);
-      border-color: #ff66cc;
+      transform: translate(-50%, -50%) scale(1.05);
     }
   }
   #zdz .player-unmute-icon {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: linear-gradient(135deg, var(--purple), var(--magenta));
     display: flex;
@@ -440,7 +454,7 @@ const STYLES = `
     text-align: left;
   }
   #zdz .player-unmute-title {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -448,272 +462,42 @@ const STYLES = `
     line-height: 1.2;
   }
   #zdz .player-unmute-sub {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     color: #00e5ff;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    margin-top: 2px;
+    margin-top: 3px;
   }
   @media(max-width: 640px) {
     #zdz .player-unmute-overlay {
-      top: 12px;
-      padding: 8px 16px;
-      gap: 10px;
+      top: 50%;
+      left: 50%;
+      padding: 12px 22px;
+      gap: 12px;
     }
     #zdz .player-unmute-icon {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
     }
     #zdz .player-unmute-title {
-      font-size: 11px;
+      font-size: 12px;
     }
     #zdz .player-unmute-sub {
-      font-size: 9px;
+      font-size: 10px;
     }
   }
   #zdz .player-iframe-wrapper {
     position: absolute;
     inset: 0;
-    pointer-events: none;
     z-index: 1;
     overflow: hidden;
   }
-  #zdz .player-iframe-wrapper iframe {
-    width: 100%;
-    height: 100%;
+  #zdz .player-iframe-wrapper wistia-player {
+    width: 100% !important;
+    height: 100% !important;
     border: none;
-    pointer-events: none;
-  }
-  #zdz .player-click-shield {
-    position: absolute;
-    inset: 0;
-    bottom: 56px;
-    z-index: 10;
-    cursor: pointer;
-    touch-action: pan-y;
-  }
-  #zdz .player-cover {
-    position: absolute;
-    inset: 0;
-    z-index: 9;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.4s ease;
-    touch-action: pan-y;
-  }
-  #zdz .player-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.65;
-  }
-  #zdz .player-cover-play {
-    position: absolute;
-    width: 84px;
-    height: 84px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--purple), var(--magenta));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 0 10px rgba(230, 51, 168, 0.15), 0 0 40px var(--magenta);
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    z-index: 11;
-  }
-  #zdz .player-cover-play:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 0 16px rgba(230, 51, 168, 0.2), 0 0 60px var(--magenta);
-  }
-  #zdz .player-controls-bar {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 56px;
-    background: linear-gradient(to top, rgba(10, 6, 18, 0.98), rgba(10, 6, 18, 0.85) 60%, transparent);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    z-index: 15;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    user-select: none;
-  }
-  #zdz .player-controls-bar.hidden {
-    opacity: 0;
-    transform: translateY(10px);
-    pointer-events: none;
-  }
-  #zdz .player-left, #zdz .player-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  #zdz .player-timeline-wrapper {
-    flex: 1;
-    height: 16px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    margin: 0 16px;
-    position: relative;
-  }
-  #zdz .player-timeline-track {
-    width: 100%;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 99px;
-    position: relative;
-    transition: height 0.15s ease;
-  }
-  #zdz .player-timeline-wrapper:hover .player-timeline-track {
-    height: 5px;
-  }
-  #zdz .player-timeline-progress {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, var(--purple), var(--magenta));
-    border-radius: 99px;
-  }
-  #zdz .player-timeline-handle {
-    position: absolute;
-    top: 50%;
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    border-radius: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 0.15s ease;
-    box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  }
-  #zdz .player-timeline-wrapper:hover .player-timeline-handle {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  #zdz .player-btn {
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    transition: background 0.2s, color 0.2s;
-  }
-  #zdz .player-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-  }
-  #zdz .player-time-display {
-    font-size: 11px;
-    font-family: var(--n);
-    color: #d1d5db;
-    min-width: 80px;
-    text-align: center;
-    letter-spacing: 0.05em;
-  }
-  #zdz .player-volume-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    position: relative;
-  }
-  #zdz .player-volume-slider-wrapper {
-    width: 0;
-    overflow: hidden;
-    transition: width 0.2s ease, opacity 0.2s ease;
-    opacity: 0;
-    display: flex;
-    align-items: center;
-  }
-  #zdz .player-volume-container:hover .player-volume-slider-wrapper {
-    width: 80px;
-    opacity: 1;
-  }
-  #zdz .player-volume-slider {
-    width: 100%;
-    height: 4px;
-    -webkit-appearance: none;
-    background: rgba(255,255,255,0.2);
-    border-radius: 99px;
-    outline: none;
-    cursor: pointer;
-  }
-  #zdz .player-volume-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    background: #fff;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
-  }
-  #zdz .player-quality-container {
-    position: relative;
-  }
-  #zdz .player-quality-btn {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    padding: 4px 8px;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 4px;
-    background: transparent;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    transition: all 0.2s;
-    text-transform: uppercase;
-  }
-  #zdz .player-quality-btn:hover {
-    background: rgba(255,255,255,0.1);
-    border-color: rgba(255,255,255,0.4);
-  }
-  #zdz .player-quality-menu {
-    position: absolute;
-    bottom: calc(100% + 12px);
-    right: 0;
-    background: #140820;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 0;
-    min-width: 100px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    display: flex;
-    flex-direction: column;
-    z-index: 20;
-  }
-  #zdz .player-quality-item {
-    padding: 8px 16px;
-    font-size: 12px;
-    font-family: var(--n);
-    color: var(--muted);
-    background: none;
-    border: none;
-    text-align: left;
-    width: 100%;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  #zdz .player-quality-item:hover {
-    background: rgba(255,255,255,0.05);
-    color: #fff;
-  }
-  #zdz .player-quality-item.active {
-    color: var(--magenta);
-    font-weight: 700;
-    background: rgba(230,51,168,0.05);
+    display: block;
   }
 `
 
@@ -806,127 +590,86 @@ export default function ZbrushDoZero() {
   const [lbImg, setLbImg] = useState<string | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [openModules, setOpenModules] = useState<Record<number, boolean>>({});
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(54); // default 54s, updated onReady
-  const [volume, setVolume] = useState(100);
-  const [isMuted, setIsMuted] = useState(true);
   const [hasActivatedSound, setHasActivatedSound] = useState(false);
-  const [selectedQuality, setSelectedQuality] = useState('1080p');
-  const [showQualityMenu, setShowQualityMenu] = useState(false);
-  const [playerReady, setPlayerReady] = useState(false);
-  const [showControls, setShowControls] = useState(true);
+  const [checkoutUrl, setCheckoutUrl] = useState<string>(() => buildZdzCheckoutUrl());
 
   const playerRef = useRef<any>(null);
-  const controlsTimeoutRef = useRef<any>(null);
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
 
-  // Portfolio carousel interactive drag & touch refs
-  const portWrapRef = useRef<HTMLDivElement | null>(null);
-  const isDraggingPort = useRef(false);
-  const startXPort = useRef(0);
-  const scrollLeftPort = useRef(0);
-  const hasDraggedPort = useRef(false);
-  const portPausedRef = useRef(false);
-
-  useEffect(() => {
-    // 1. Check if YT already ready
-    if ((window as any).YT && (window as any).YT.Player) {
-      initYTPlayer();
-      return;
-    }
-
-    // 2. Set up global callback
-    const prevCallback = (window as any).onYouTubeIframeAPIReady;
-    (window as any).onYouTubeIframeAPIReady = () => {
-      if (prevCallback) prevCallback();
-      initYTPlayer();
-    };
-
-    // 3. Load script asynchronously without blocking
-    if (!document.getElementById('yt-iframe-api-script')) {
-      const tag = document.createElement('script');
-      tag.id = 'yt-iframe-api-script';
-      tag.src = 'https://www.youtube.com/iframe_api';
-      tag.async = true;
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
-
-    // Light fallback timer (runs only once after 800ms if event didn't trigger)
-    const fallbackTimer = setTimeout(() => {
-      if ((window as any).YT && (window as any).YT.Player && !playerRef.current) {
-        initYTPlayer();
-      }
-    }, 800);
-
-    return () => {
-      clearTimeout(fallbackTimer);
-      if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-    };
-  }, []);
-
-  const initYTPlayer = () => {
-    if (playerRef.current) return;
-    try {
-      playerRef.current = new (window as any).YT.Player('youtube-hero-player', {
-        videoId: 'Jjw6at0zSjQ',
-        playerVars: {
-          autoplay: 1,
-          mute: 1,
-          playsinline: 1,
-          controls: 0,
-          rel: 0,
-          showinfo: 0,
-          modestbranding: 1,
-          iv_load_policy: 3,
-          fs: 0,
-          disablekb: 1,
-          origin: window.location.origin,
-        },
-        events: {
-          onReady: (event: any) => {
-            setPlayerReady(true);
-            setDuration(event.target.getDuration() || 54);
-            try {
-              event.target.mute();
-              event.target.playVideo();
-              setIsPlaying(true);
-              setIsMuted(true);
-            } catch (err) {
-              console.warn('Autoplay error handled:', err);
-            }
-          },
-          onStateChange: (event: any) => {
-            // PlayerState: PLAYING (1), PAUSED (2), ENDED (0), BUFFERING (3)
-            if (event.data === 1) {
-              setIsPlaying(true);
-              resetControlsTimeout();
-            } else if (event.data === 2) {
-              setIsPlaying(false);
-              setShowControls(true);
-            } else if (event.data === 0) {
-              setIsPlaying(false);
-              setCurrentTime(0);
-              setShowControls(true);
-            }
-          }
-        }
-      });
-    } catch (err) {
-      console.error('Error loading custom YouTube player:', err);
+  const handleCheckoutClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const latestUrl = buildZdzCheckoutUrl();
+    if (latestUrl) {
+      (e.currentTarget as HTMLAnchorElement).href = latestUrl;
     }
   };
 
   useEffect(() => {
-    let updateTimer: any;
-    if (isPlaying && playerRef.current && playerRef.current.getCurrentTime) {
-      updateTimer = setInterval(() => {
-        setCurrentTime(playerRef.current.getCurrentTime());
-      }, 250);
+    // Update and ensure tracking parameters are synchronized on mount
+    setCheckoutUrl(buildZdzCheckoutUrl());
+  }, []);
+
+  useEffect(() => {
+    // 1. Load Wistia scripts
+    if (!document.getElementById('wistia-player-script')) {
+      const script1 = document.createElement('script');
+      script1.id = 'wistia-player-script';
+      script1.src = 'https://fast.wistia.com/player.js';
+      script1.async = true;
+      document.head.appendChild(script1);
     }
-    return () => clearInterval(updateTimer);
-  }, [isPlaying]);
+    if (!document.getElementById('wistia-media-script')) {
+      const script2 = document.createElement('script');
+      script2.id = 'wistia-media-script';
+      script2.src = 'https://fast.wistia.com/embed/e31bqnp5t3.js';
+      script2.async = true;
+      script2.type = 'module';
+      document.head.appendChild(script2);
+    }
+
+    const attachWistiaEvents = (video: any) => {
+      if (!video) return;
+      playerRef.current = video;
+
+      try {
+        if (typeof video.mute === 'function') video.mute();
+        if (typeof video.play === 'function') video.play();
+      } catch (err) {
+        console.warn('Wistia autoplay muted:', err);
+      }
+    };
+
+    // 2. Setup Wistia queue handler
+    (window as any)._wq = (window as any)._wq || [];
+    (window as any)._wq.push({
+      id: 'e31bqnp5t3',
+      options: {
+        autoPlay: 'muted',
+        silentAutoPlay: 'allow',
+        playsinline: true,
+      },
+      onReady: (video: any) => {
+        attachWistiaEvents(video);
+      }
+    });
+
+    // 3. One-time fallback check for wistia custom element in DOM
+    let attempts = 0;
+    const checkTimer = setInterval(() => {
+      attempts++;
+      const el: any = document.getElementById('wistia-hero-player') || document.querySelector('wistia-player[media-id="e31bqnp5t3"]');
+      if (el && (el.wistiaApi || typeof el.play === 'function')) {
+        attachWistiaEvents(el.wistiaApi || el);
+        clearInterval(checkTimer);
+      }
+      if (attempts > 12) {
+        clearInterval(checkTimer);
+      }
+    }, 400);
+
+    return () => {
+      clearInterval(checkTimer);
+    };
+  }, []);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches && e.touches[0]) {
@@ -949,127 +692,93 @@ export default function ZbrushDoZero() {
     }
     const dx = Math.abs(clientX - touchStartPos.current.x);
     const dy = Math.abs(clientY - touchStartPos.current.y);
-    return dx > 10 || dy > 10;
+    return dx > 20 || dy > 20;
   };
 
   const handleActivateSound = (e?: any) => {
     if (e && isSwipeGesture(e)) return;
     if (e && e.stopPropagation) e.stopPropagation();
-    if (!playerRef.current || !playerReady) return;
+    
+    setHasActivatedSound(true);
+
+    // 1. Through Wistia queue API (most reliable)
+    (window as any)._wq = (window as any)._wq || [];
+    (window as any)._wq.push({
+      id: 'e31bqnp5t3',
+      onReady: (video: any) => {
+        try {
+          if (typeof video.unmute === 'function') video.unmute();
+          if (typeof video.unMute === 'function') video.unMute();
+          if (typeof video.volume === 'function') video.volume(1);
+          if (typeof video.setVolume === 'function') video.setVolume(100);
+          if (typeof video.time === 'function') video.time(0);
+          if (typeof video.seekTo === 'function') video.seekTo(0, true);
+          if (typeof video.play === 'function') video.play();
+        } catch (err) {
+          console.warn('Wistia queue activate sound error:', err);
+        }
+      }
+    });
+
+    // 2. Through global Wistia.api
     try {
-      playerRef.current.unMute();
-      playerRef.current.setVolume(100);
-      setVolume(100);
-      setIsMuted(false);
-      setHasActivatedSound(true);
-      playerRef.current.seekTo(0, true);
-      setCurrentTime(0);
-      playerRef.current.playVideo();
-      setIsPlaying(true);
-      resetControlsTimeout();
+      const wApi = (window as any).Wistia?.api?.('e31bqnp5t3') || (window as any).Wistia?.api?.('wistia-hero-player');
+      if (wApi) {
+        if (typeof wApi.unmute === 'function') wApi.unmute();
+        if (typeof wApi.volume === 'function') wApi.volume(1);
+        if (typeof wApi.time === 'function') wApi.time(0);
+        if (typeof wApi.play === 'function') wApi.play();
+      }
     } catch (err) {
-      console.warn('Error activating sound:', err);
+      console.warn('Global Wistia api error:', err);
     }
-  };
 
-  const togglePlayPause = (e?: any) => {
-    if (e && isSwipeGesture(e)) return;
-    if (e && e.stopPropagation) e.stopPropagation();
-    if (!playerRef.current || !playerReady) return;
-    if (!hasActivatedSound) {
-      handleActivateSound(e);
-      return;
-    }
-    if (isPlaying) {
-      playerRef.current.pauseVideo();
-      setIsPlaying(false);
-      setShowControls(true);
-    } else {
-      playerRef.current.playVideo();
-      setIsPlaying(true);
-      resetControlsTimeout();
-    }
-  };
-
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    if (!playerRef.current || !playerReady) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const percentage = Math.max(0, Math.min(1, clickX / rect.width));
-    const seekSeconds = percentage * duration;
-    setCurrentTime(seekSeconds);
-    playerRef.current.seekTo(seekSeconds, true);
-    resetControlsTimeout();
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.stopPropagation();
-    const val = parseInt(e.target.value, 10);
-    setVolume(val);
-    if (playerRef.current && playerReady) {
-      playerRef.current.setVolume(val);
-      if (val > 0) {
-        playerRef.current.unMute();
-        setIsMuted(false);
-        setHasActivatedSound(true);
+    // 3. Through cached playerRef
+    if (playerRef.current) {
+      const p = playerRef.current;
+      try {
+        if (typeof p.unmute === 'function') p.unmute();
+        if (typeof p.volume === 'function') p.volume(1);
+        if (typeof p.time === 'function') p.time(0);
+        if (typeof p.play === 'function') p.play();
+      } catch (err) {
+        console.warn('playerRef activate sound error:', err);
       }
     }
-    resetControlsTimeout();
-  };
 
-  const toggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!playerRef.current || !playerReady) return;
-    if (!hasActivatedSound) {
-      handleActivateSound(e);
-      return;
-    }
-    if (isMuted) {
-      playerRef.current.unMute();
-      setIsMuted(false);
-      playerRef.current.setVolume(volume);
-    } else {
-      playerRef.current.mute();
-      setIsMuted(true);
-    }
-    resetControlsTimeout();
-  };
+    // 4. Through Wistia Custom Element DOM properties
+    const wistiaEl: any = document.getElementById('wistia-hero-player') || document.querySelector('wistia-player[media-id="e31bqnp5t3"]');
+    if (wistiaEl) {
+      try {
+        wistiaEl.muted = false;
+        wistiaEl.removeAttribute('muted');
+        wistiaEl.currentTime = 0;
+        wistiaEl.volume = 1;
+        if (typeof wistiaEl.unmute === 'function') wistiaEl.unmute();
+        if (typeof wistiaEl.time === 'function') wistiaEl.time(0);
+        if (typeof wistiaEl.play === 'function') wistiaEl.play();
 
-  const handleQualityChange = (quality: string) => {
-    setSelectedQuality(quality);
-    setShowQualityMenu(false);
-    if (!playerRef.current || !playerReady) return;
+        // If custom element has wistiaApi attached
+        if (wistiaEl.wistiaApi) {
+          if (typeof wistiaEl.wistiaApi.unmute === 'function') wistiaEl.wistiaApi.unmute();
+          if (typeof wistiaEl.wistiaApi.volume === 'function') wistiaEl.wistiaApi.volume(1);
+          if (typeof wistiaEl.wistiaApi.time === 'function') wistiaEl.wistiaApi.time(0);
+          if (typeof wistiaEl.wistiaApi.play === 'function') wistiaEl.wistiaApi.play();
+        }
 
-    let ytQuality = 'default';
-    if (quality === '1080p') ytQuality = 'hd1080';
-    else if (quality === '720p') ytQuality = 'hd720';
-    else if (quality === '480p') ytQuality = 'large';
-    else if (quality === '360p') ytQuality = 'medium';
-
-    playerRef.current.setPlaybackQuality(ytQuality);
-    resetControlsTimeout();
-  };
-
-  const resetControlsTimeout = () => {
-    setShowControls(true);
-    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-    if (isPlaying) {
-      controlsTimeoutRef.current = setTimeout(() => {
-        setShowControls(false);
-      }, 2500);
+        // Inner HTML5 video tag if present in DOM or shadowRoot
+        const innerVideo: any = wistiaEl.shadowRoot?.querySelector('video') || wistiaEl.querySelector('video');
+        if (innerVideo) {
+          innerVideo.muted = false;
+          innerVideo.currentTime = 0;
+          innerVideo.volume = 1;
+          innerVideo.play()?.catch(() => {});
+        }
+      } catch (err) {
+        console.warn('DOM element activate sound error:', err);
+      }
     }
   };
-
-  const handlePlayerMouseMove = () => {
-    resetControlsTimeout();
-  };
-
-  const formatTime = (secs: number) => {
-    const minutes = Math.floor(secs / 60)
-    const seconds = Math.floor(secs % 60)
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`
-  }
 
   useEffect(() => {
     const els = document.querySelectorAll('#zdz .rv')
@@ -1080,136 +789,37 @@ export default function ZbrushDoZero() {
 
     const cta = document.getElementById('zdz-cta')
     let shown = false
+    let isTicking = false
     const onScroll = () => {
-      const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight)
-      if (!shown && pct > 0.4) { cta?.classList.add('on'); shown = true }
-      const oferta = document.getElementById('zdz-oferta')
-      if (oferta) {
-        const r = oferta.getBoundingClientRect()
-        if (r.top < window.innerHeight && r.bottom > 0) cta?.classList.remove('on')
-        else if (shown) cta?.classList.add('on')
+      if (!isTicking) {
+        window.requestAnimationFrame(() => {
+          const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight)
+          if (!shown && pct > 0.4) { cta?.classList.add('on'); shown = true }
+          const oferta = document.getElementById('zdz-oferta')
+          if (oferta) {
+            const r = oferta.getBoundingClientRect()
+            if (r.top < window.innerHeight && r.bottom > 0) cta?.classList.remove('on')
+            else if (shown) cta?.classList.add('on')
+          }
+          isTicking = false
+        })
+        isTicking = true
       }
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => { obs.disconnect(); window.removeEventListener('scroll', onScroll) }
   }, [])
 
-  // Interactive Infinite Carousel Effect
-  useEffect(() => {
-    const wrap = portWrapRef.current;
-    if (!wrap) return;
-
-    let animId: number;
-    const speed = 0.8; // px per frame
-
-    const tick = () => {
-      if (!portPausedRef.current && !isDraggingPort.current && wrap) {
-        wrap.scrollLeft += speed;
-        // Infinite wrap check: if reached half way (after first copy of images), reset seamlessly
-        const maxScroll = (wrap.scrollWidth - wrap.clientWidth) / 2;
-        if (maxScroll > 0 && wrap.scrollLeft >= maxScroll) {
-          wrap.scrollLeft -= maxScroll;
-        }
-      }
-      animId = requestAnimationFrame(tick);
-    };
-
-    animId = requestAnimationFrame(tick);
-
-    return () => {
-      cancelAnimationFrame(animId);
-    };
-  }, []);
-
-  const handlePortMouseDown = (e: React.MouseEvent) => {
-    const wrap = portWrapRef.current;
-    if (!wrap) return;
-    isDraggingPort.current = true;
-    hasDraggedPort.current = false;
-    portPausedRef.current = true;
-    startXPort.current = e.pageX - wrap.offsetLeft;
-    scrollLeftPort.current = wrap.scrollLeft;
-    wrap.classList.add('is-dragging');
-  };
-
-  const handlePortMouseMove = (e: React.MouseEvent) => {
-    if (!isDraggingPort.current) return;
-    const wrap = portWrapRef.current;
-    if (!wrap) return;
-    e.preventDefault();
-    const x = e.pageX - wrap.offsetLeft;
-    const walk = (x - startXPort.current) * 1.5;
-    if (Math.abs(walk) > 5) {
-      hasDraggedPort.current = true;
-    }
-    wrap.scrollLeft = scrollLeftPort.current - walk;
-
-    // Boundary wrap
-    const halfWidth = wrap.scrollWidth / 2;
-    if (wrap.scrollLeft <= 0) {
-      wrap.scrollLeft += halfWidth;
-      scrollLeftPort.current += halfWidth;
-    } else if (wrap.scrollLeft >= halfWidth) {
-      wrap.scrollLeft -= halfWidth;
-      scrollLeftPort.current -= halfWidth;
-    }
-  };
-
-  const handlePortMouseUp = () => {
-    isDraggingPort.current = false;
-    const wrap = portWrapRef.current;
-    if (wrap) {
-      wrap.classList.remove('is-dragging');
-    }
-    // Briefly keep paused before resuming smooth flow
-    setTimeout(() => {
-      portPausedRef.current = false;
-    }, 1200);
-  };
-
-  const handlePortTouchStart = (e: React.TouchEvent) => {
-    const wrap = portWrapRef.current;
-    if (!wrap) return;
-    isDraggingPort.current = true;
-    hasDraggedPort.current = false;
-    portPausedRef.current = true;
-    startXPort.current = e.touches[0].pageX - wrap.offsetLeft;
-    scrollLeftPort.current = wrap.scrollLeft;
-  };
-
-  const handlePortTouchMove = (e: React.TouchEvent) => {
-    if (!isDraggingPort.current) return;
-    const wrap = portWrapRef.current;
-    if (!wrap) return;
-    const x = e.touches[0].pageX - wrap.offsetLeft;
-    const walk = (x - startXPort.current) * 1.2;
-    if (Math.abs(walk) > 5) {
-      hasDraggedPort.current = true;
-    }
-    wrap.scrollLeft = scrollLeftPort.current - walk;
-
-    // Boundary wrap
-    const halfWidth = wrap.scrollWidth / 2;
-    if (wrap.scrollLeft <= 0) {
-      wrap.scrollLeft += halfWidth;
-      scrollLeftPort.current += halfWidth;
-    } else if (wrap.scrollLeft >= halfWidth) {
-      wrap.scrollLeft -= halfWidth;
-      scrollLeftPort.current -= halfWidth;
-    }
-  };
-
-  const handlePortTouchEnd = () => {
-    isDraggingPort.current = false;
-    setTimeout(() => {
-      portPausedRef.current = false;
-    }, 1500);
-  };
-
   return (
     <>
       <style>{STYLES}</style>
-      <a href="#zdz-oferta" className="zdz-cta" id="zdz-floating-cta">Quero começar do zero <span className="arrow">→</span></a>
+      <a 
+        href="#zdz-oferta" 
+        className="zdz-cta" 
+        id="zdz-floating-cta"
+      >
+        Quero começar do zero <span className="arrow">→</span>
+      </a>
       <div id="zdz">
         <main>
 
@@ -1237,29 +847,23 @@ export default function ZbrushDoZero() {
                 className="hero-img rv d2" 
                 style={{ aspectRatio: '16/9', position: 'relative', overflow: 'hidden', borderRadius: '16px', background: '#000', border: '1px solid var(--border)' }} 
                 aria-label="ZBrush — modelos 3D"
-                onMouseMove={handlePlayerMouseMove}
-                onMouseLeave={() => isPlaying && setShowControls(false)}
               >
                 <div className="player-container" onTouchStart={handleTouchStart}>
-                  {/* YouTube Iframe element */}
+                  {/* Wistia Native Player */}
                   <div className="player-iframe-wrapper">
-                    <div id="youtube-hero-player" />
+                    <WistiaPlayer 
+                      media-id="e31bqnp5t3" 
+                      aspect="1.7777777777777777"
+                      id="wistia-hero-player"
+                      auto-play="muted"
+                      silent-auto-play="allow"
+                      muted="true"
+                      playsinline="true"
+                      style={{ width: '100%', height: '100%', display: 'block' }}
+                    />
                   </div>
 
-                  {/* Absolute Click Shield: captures clicks to play/pause or activate sound */}
-                  <div 
-                    className="player-click-shield" 
-                    onTouchStart={handleTouchStart}
-                    onClick={(e) => {
-                      if (!hasActivatedSound) {
-                        handleActivateSound(e);
-                      } else {
-                        togglePlayPause(e);
-                      }
-                    }} 
-                  />
-
-                  {/* Smart Sound Activation / Unmute Banner */}
+                  {/* Smart Sound Activation / Unmute Button with gentle attention-grabbing movement */}
                   {!hasActivatedSound && (
                     <div 
                       className="player-unmute-overlay" 
@@ -1276,96 +880,16 @@ export default function ZbrushDoZero() {
                       </div>
                     </div>
                   )}
-
-                  {/* Custom Poster Image / Start Cover */}
-                  {!isPlaying && currentTime === 0 && !hasActivatedSound && (
-                    <div 
-                      className="player-cover" 
-                      onTouchStart={handleTouchStart}
-                      onClick={(e) => handleActivateSound(e)}
-                    >
-                      <img 
-                        src="https://zbrushdozero.com/var/assets/img/media/original/46e16046e3eb9f4f9c6cca002e9779e8/processo.png" 
-                        alt="Play Video" 
-                      />
-                      <div className="player-cover-play">
-                        <Play size={36} fill="#fff" stroke="#fff" style={{ marginLeft: '4px' }} />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Sleek Custom Control Bar */}
-                  <div className={`player-controls-bar ${(!showControls && isPlaying) ? 'hidden' : ''}`}>
-                    <div className="player-left">
-                      <button className="player-btn" onClick={togglePlayPause} aria-label={isPlaying ? "Pause" : "Play"}>
-                        {isPlaying ? <Pause size={18} fill="#fff" /> : <Play size={18} fill="#fff" />}
-                      </button>
-
-                      <div className="player-volume-container">
-                        <button className="player-btn" onClick={toggleMute} aria-label={isMuted ? "Unmute" : "Mute"}>
-                          {isMuted || volume === 0 ? <VolumeX size={18} /> : volume < 50 ? <Volume1 size={18} /> : <Volume2 size={18} />}
-                        </button>
-                        <div className="player-volume-slider-wrapper">
-                          <input 
-                            type="range" 
-                            min="0" 
-                            max="100" 
-                            value={isMuted ? 0 : volume} 
-                            onChange={handleVolumeChange} 
-                            className="player-volume-slider"
-                            style={{ background: `linear-gradient(to right, var(--magenta) ${isMuted ? 0 : volume}%, rgba(255,255,255,0.2) ${isMuted ? 0 : volume}%)` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="player-time-display">
-                        {formatTime(Math.floor(currentTime))} / {formatTime(Math.floor(duration))}
-                      </div>
-                    </div>
-
-                    {/* Horizontal seeking timeline */}
-                    <div className="player-timeline-wrapper" onClick={handleSeek}>
-                      <div className="player-timeline-track">
-                        <div 
-                          className="player-timeline-progress" 
-                          style={{ width: `${(currentTime / duration) * 100}%` }} 
-                        />
-                        <div 
-                          className="player-timeline-handle" 
-                          style={{ left: `${(currentTime / duration) * 100}%` }} 
-                        />
-                      </div>
-                    </div>
-
-                    <div className="player-right">
-                      <div className="player-quality-container">
-                        <button 
-                          className="player-quality-btn" 
-                          onClick={(e) => { e.stopPropagation(); setShowQualityMenu(!showQualityMenu); }}
-                        >
-                          {selectedQuality} <ChevronDown size={12} />
-                        </button>
-                        
-                        {showQualityMenu && (
-                          <div className="player-quality-menu">
-                            {['1080p', '720p', '480p', '360p', 'Auto'].map((q) => (
-                              <button 
-                                key={q} 
-                                className={`player-quality-item ${selectedQuality === q ? 'active' : ''}`}
-                                onClick={(e) => { e.stopPropagation(); handleQualityChange(q); }}
-                              >
-                                {q}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
                 </div>
               </div>
               <div className="rv d3" style={{ marginTop: '48px' }}>
-                <a href="#zdz-oferta" className="btn" id="zdz-hero-cta">Quero começar do zero <span className="arrow">→</span></a>
+                <a 
+                  href="#zdz-oferta" 
+                  className="btn" 
+                  id="zdz-hero-cta"
+                >
+                  Quero começar do zero <span className="arrow">→</span>
+                </a>
                 <div className="micro">Acesso vitalício · 7 dias de garantia</div>
               </div>
             </div>
@@ -1454,17 +978,25 @@ export default function ZbrushDoZero() {
               </div>
               <div className="video-frame rv">
                 <iframe 
-                  src="https://www.youtube.com/embed/IwvuCM9_zbU?autoplay=1&controls=1&loop=1&rel=0&mute=1&playlist=IwvuCM9_zbU"
+                  src="https://www.youtube.com/embed/IwvuCM9_zbU?controls=1&rel=0"
                   title="YouTube video player" 
+                  loading="lazy"
                   frameBorder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                   referrerPolicy="strict-origin-when-cross-origin" 
                   allowFullScreen
                   style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 3 }}
                 ></iframe>
               </div>
               <div className="video-foot rv">
-                <a href="#zdz-oferta" className="btn" id="zdz-process-cta" style={{ padding: '18px 48px' }}>Quero aprender o passo a passo <span className="arrow">→</span></a>
+                <a 
+                  href="#zdz-oferta" 
+                  className="btn" 
+                  id="zdz-process-cta" 
+                  style={{ padding: '18px 48px' }}
+                >
+                  Quero aprender o passo a passo <span className="arrow">→</span>
+                </a>
                 <div className="meta">Aulas curtas • Método em etapas • Acesso imediato</div>
               </div>
             </div>
@@ -1503,34 +1035,14 @@ export default function ZbrushDoZero() {
               </div>
             </div>
             
-            {/* Infinite Portfolio Carousel with Touch and Drag */}
-            <div 
-              className="port-wrap rv"
-              ref={portWrapRef}
-              onMouseDown={handlePortMouseDown}
-              onMouseMove={handlePortMouseMove}
-              onMouseUp={handlePortMouseUp}
-              onMouseLeave={handlePortMouseUp}
-              onTouchStart={handlePortTouchStart}
-              onTouchMove={handlePortTouchMove}
-              onTouchEnd={handlePortTouchEnd}
-              onMouseEnter={() => { portPausedRef.current = true; }}
-              onMouseOut={(e) => { 
-                if (!isDraggingPort.current && !e.currentTarget.contains(e.relatedTarget as Node)) {
-                  portPausedRef.current = false; 
-                }
-              }}
-            >
+            {/* Smooth GPU-Accelerated Infinite Portfolio Carousel */}
+            <div className="port-wrap rv">
               <div className="port-track">
                 {portImgs.concat(portImgs).map((img, i) => (
                   <div 
                     key={i} 
                     className="port-item" 
-                    onClick={() => {
-                      if (!hasDraggedPort.current) {
-                        setLbImg(img);
-                      }
-                    }}
+                    onClick={() => setLbImg(img)}
                   >
                     <img src={img} alt={`Trabalho ${(i % portImgs.length) + 1}`} loading="lazy" />
                   </div>
@@ -1620,7 +1132,13 @@ export default function ZbrushDoZero() {
                 })}
               </div>
               <div style={{textAlign:'center',marginTop:'56px'}} className="rv">
-                <a href="#zdz-oferta" className="btn" id="zdz-modules-cta">Quero começar do zero <span className="arrow">→</span></a>
+                <a 
+                  href="#zdz-oferta" 
+                  className="btn" 
+                  id="zdz-modules-cta"
+                >
+                  Quero começar do zero <span className="arrow">→</span>
+                </a>
               </div>
             </div>
           </section>
@@ -1652,7 +1170,13 @@ export default function ZbrushDoZero() {
                     <li><div className="dot"/>Reembolso integral em qualquer momento dentro dos 7 primeiros dias.</li>
                     <li><div className="dot"/>Sem perguntas, sem formulário extenso, sem dor de cabeça.</li>
                   </ul>
-                  <a href="#zdz-oferta" className="gua-btn" id="zdz-garantia-cta">Quero entrar sem risco →</a>
+                  <a 
+                    href="#zdz-oferta" 
+                    className="gua-btn" 
+                    id="zdz-garantia-cta"
+                  >
+                    Quero entrar sem risco →
+                  </a>
                 </div>
               </div>
             </div>
@@ -1675,7 +1199,14 @@ export default function ZbrushDoZero() {
                     <div className="price-juros">sem juros</div>
                     <div className="price-divider"/>
                     <div className="price-cash">ou à vista <strong style={{color:'var(--ink)'}}>R$257</strong></div>
-                    <a href="https://pay.hotmart.com/H103748861J?checkoutMode=10" className="btn" id="zdz-checkout-cta">Quero começar agora <span className="arrow">→</span></a>
+                    <a 
+                      href={checkoutUrl} 
+                      className="btn" 
+                      id="zdz-checkout-cta"
+                      onClick={handleCheckoutClick}
+                    >
+                      Quero começar agora <span className="arrow">→</span>
+                    </a>
                   </div>
                   <div className="price-feats">
                     <div className="heading">O que você recebe</div>

@@ -1,29 +1,133 @@
 const STORAGE_KEY = 'cardoso3d_tracking_params';
 
-// Helper to get all stored parameters from both sessionStorage and localStorage
-export const getStoredParams = (): Record<string, string> => {
-  let params: Record<string, string> = {};
-  
+export const TRACKING_KEYS = [
+  'src',
+  'sck',
+  'utm_source',
+  'utm_medium',
+  'utm_campaign',
+  'utm_content',
+  'utm_term',
+  'fbclid'
+];
+
+// Helper to get all stored parameters from both sessionStorage, localStorage, and current URL
+export const getCapturedTrackingParams = (): Record<string, string> => {
+  const params: Record<string, string> = {};
+
+  if (typeof window === 'undefined') return params;
+
+  // 1. Read from sessionStorage
   try {
     const sessionData = sessionStorage.getItem(STORAGE_KEY);
     if (sessionData) {
-      params = JSON.parse(sessionData);
+      Object.assign(params, JSON.parse(sessionData));
     }
   } catch (e) {
     console.error('Error reading from sessionStorage:', e);
   }
 
+  // 2. Read from localStorage as secondary backup
   try {
     const localData = localStorage.getItem(STORAGE_KEY);
     if (localData) {
       const localParams = JSON.parse(localData);
-      params = { ...localParams, ...params };
+      Object.entries(localParams).forEach(([k, v]) => {
+        if (!params[k] && typeof v === 'string') {
+          params[k] = v;
+        }
+      });
     }
   } catch (e) {
     console.error('Error reading from localStorage:', e);
   }
 
+  // 3. Read from URL search params (highest priority on arrival)
+  try {
+    const searchParams = new URLSearchParams(window.location.search);
+    let hasNew = false;
+    TRACKING_KEYS.forEach(key => {
+      const val = searchParams.get(key);
+      if (val) {
+        params[key] = val;
+        hasNew = true;
+      }
+    });
+
+    // Also capture any extra utm_* keys
+    searchParams.forEach((val, key) => {
+      if (key.startsWith('utm_') && val) {
+        params[key] = val;
+        hasNew = true;
+      }
+    });
+
+    if (hasNew) {
+      saveStoredParams(params);
+    }
+  } catch (e) {
+    console.error('Error parsing search params:', e);
+  }
+
   return params;
+};
+
+// Builder function for Hotmart Checkout URLs with complete tracking parameter propagation
+export const buildHotmartCheckoutUrl = (
+  baseUrl: string,
+  extraParams?: Record<string, string>
+): string => {
+  if (typeof window === 'undefined') return baseUrl;
+
+  const captured = getCapturedTrackingParams();
+  const allParams = { ...captured, ...(extraParams || {}) };
+
+  const queryParts: string[] = [];
+
+  // Determine 'src':
+  // 1. If explicit 'src' exists, always use it directly (never overwrite).
+  // 2. If NO 'src' exists, copy 'utm_source' into 'src' for Hotmart sales attribution reports.
+  const explicitSrc = allParams['src'];
+  const utmSource = allParams['utm_source'];
+  const effectiveSrc = explicitSrc || utmSource;
+
+  if (effectiveSrc) {
+    queryParts.push(`src=${encodeURIComponent(effectiveSrc)}`);
+  }
+
+  // Explicit priority order for standard parameters
+  const standardKeys = ['sck', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid'];
+  standardKeys.forEach(key => {
+    const val = allParams[key];
+    if (val) {
+      queryParts.push(`${key}=${encodeURIComponent(val)}`);
+    }
+  });
+
+  // Append any other tracking keys captured that aren't in the standard list or 'src'
+  Object.keys(allParams).forEach(key => {
+    if (!standardKeys.includes(key) && key !== 'src' && allParams[key]) {
+      queryParts.push(`${key}=${encodeURIComponent(allParams[key])}`);
+    }
+  });
+
+  if (queryParts.length === 0) {
+    return baseUrl;
+  }
+
+  const separator = baseUrl.includes('?') ? '&' : '?';
+  return `${baseUrl}${separator}${queryParts.join('&')}`;
+};
+
+export const buildZdzCheckoutUrl = (
+  baseUrl = 'https://pay.hotmart.com/H103748861J?checkoutMode=10'
+): string => {
+  return buildHotmartCheckoutUrl(baseUrl);
+};
+
+// Helper to get all stored parameters from both sessionStorage and localStorage
+export const getStoredParams = (): Record<string, string> => {
+  return getCapturedTrackingParams();
 };
 
 // Helper to save params to both storages
