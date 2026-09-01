@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { Play, Pause, Volume2, VolumeX, Volume1, ChevronDown, X } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeX, Volume1, ChevronDown, X, Star, Quote, Sparkles, Image as ImageIcon } from 'lucide-react'
 import { buildZdzCheckoutUrl } from '../utils/tracking'
 
 const WistiaPlayer = 'wistia-player' as any;
@@ -229,6 +229,50 @@ const STYLES = `
   #zdz .price-feats li:first-child{border-top:none;}
   #zdz .price-feats .num{font-family:var(--d);font-size:13px;color:var(--purpleHi);min-width:24px;}
 
+  /* Social Proof / Testimonials & Student Gallery */
+  #zdz .testimonials-sec{padding:96px 0; border-top:1px solid var(--border); position:relative;}
+  #zdz .test-grid{display:grid; grid-template-columns:1.35fr 1fr; gap:24px; align-items:stretch;}
+  
+  #zdz .test-card-main{background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:32px; display:grid; grid-template-columns:1.2fr 0.8fr; gap:28px; position:relative; overflow:hidden; box-shadow:0 20px 40px -15px rgba(0,0,0,0.5);}
+  #zdz .test-card-main::before{content:""; position:absolute; inset:0; background:radial-gradient(circle at 10% 20%, rgba(230,51,168,0.12), transparent 60%); pointer-events:none;}
+  
+  #zdz .test-card-side{background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:32px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden; box-shadow:0 20px 40px -15px rgba(0,0,0,0.5);}
+  #zdz .test-card-side::before{content:""; position:absolute; inset:0; background:radial-gradient(circle at 90% 10%, rgba(0,229,255,0.1), transparent 60%); pointer-events:none;}
+
+  #zdz .test-stars{display:flex; gap:4px; color:#facc15; margin-bottom:16px;}
+  #zdz .test-stars svg{width:16px; height:16px; fill:#facc15;}
+  #zdz .test-quote{font-family:var(--n); font-size:15px; color:var(--ink); line-height:1.65; margin:0 0 24px; position:relative; z-index:1; font-weight:400;}
+  #zdz .test-quote.side{font-size:16px; line-height:1.7;}
+  #zdz .test-highlight{display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--purpleHi); background:rgba(139,92,246,0.12); border:1px solid rgba(183,148,246,0.25); padding:4px 10px; border-radius:99px; margin-bottom:16px;}
+  
+  #zdz .test-author{display:flex; align-items:center; gap:12px; margin-top:auto; position:relative; z-index:1;}
+  #zdz .test-avatar{width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--magenta)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:#fff; flex-shrink:0; box-shadow:0 4px 12px rgba(230,51,168,0.35);}
+  #zdz .test-author-info{display:flex; flex-direction:column;}
+  #zdz .test-name{font-family:var(--n); font-size:16px; font-weight:700; color:#fff;}
+  #zdz .test-role{font-family:var(--n); font-size:12px; color:var(--muted); font-weight:500;}
+
+  #zdz .test-artwork-box{border-radius:14px; border:1px solid rgba(255,255,255,0.1); background:linear-gradient(135deg, rgba(20,8,32,0.9), rgba(10,6,18,0.95)); overflow:hidden; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:220px; cursor:pointer; transition:transform 0.3s ease, border-color 0.3s ease;}
+  #zdz .test-artwork-box:hover{transform:scale(1.02); border-color:var(--purpleHi);}
+  #zdz .test-artwork-box img{width:100%; height:100%; object-fit:cover; display:block;}
+  #zdz .test-artwork-tag{position:absolute; bottom:10px; left:10px; right:10px; font-family:var(--n); font-size:10px; font-weight:700; letter-spacing:0.1em; color:#fff; background:rgba(10,6,18,0.85); backdrop-filter:blur(6px); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); text-align:center; text-transform:uppercase;}
+  #zdz .test-artwork-placeholder{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px; text-align:center; color:var(--muted);}
+  #zdz .test-artwork-placeholder svg{width:36px; height:36px; color:var(--purpleHi); opacity:0.8;}
+
+  /* Student Gallery Grid */
+  #zdz .gallery-header{text-align:center; margin-top:72px; margin-bottom:36px;}
+  #zdz .gallery-title{font-family:var(--n); font-size:32px; font-weight:800; text-transform:uppercase; letter-spacing:-0.01em; color:#fff;}
+  #zdz .gallery-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:20px;}
+  #zdz .gallery-card{border:1px solid var(--border); border-radius:16px; background:linear-gradient(145deg, rgba(20,8,32,0.7), rgba(10,6,18,0.8)); overflow:hidden; transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s, box-shadow 0.3s; display:flex; flex-direction:column;}
+  #zdz .gallery-card:hover{transform:translateY(-4px); border-color:rgba(183,148,246,0.4); box-shadow:0 16px 36px -10px rgba(139,92,246,0.3);}
+  #zdz .gallery-img-wrap{aspect-ratio:1/1; position:relative; overflow:hidden; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center; cursor:pointer;}
+  #zdz .gallery-img-wrap img{width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.4s ease;}
+  #zdz .gallery-card:hover .gallery-img-wrap img{transform:scale(1.05);}
+  #zdz .gallery-placeholder{width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:radial-gradient(circle at center, rgba(139,92,246,0.1), transparent 70%); color:var(--muted2); padding:16px; text-align:center;}
+  #zdz .gallery-placeholder svg{width:32px; height:32px; color:var(--purpleHi); opacity:0.6;}
+  #zdz .gallery-caption{padding:16px; border-top:1px solid var(--border); background:rgba(255,255,255,0.01); display:flex; flex-direction:column; gap:4px;}
+  #zdz .gallery-student-name{font-family:var(--n); font-size:15px; font-weight:700; color:#fff;}
+  #zdz .gallery-tag{font-family:var(--n); font-size:11px; font-weight:600; color:var(--purpleHi); letter-spacing:0.06em; text-transform:uppercase;}
+
   /* FAQ */
   #zdz .faq{padding: 96px 0; border-top: 1px solid var(--border);}
   #zdz .faq-container{max-width: 780px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; margin-top: 48px;}
@@ -326,6 +370,11 @@ const STYLES = `
     #zdz .player-quality-btn svg {width: 8px !important; height: 8px !important;}
     .zdz-cta{font-size:11px;padding:14px 22px;}
     #zdz .btn{font-size:12px; padding:16px 24px;}
+    #zdz .test-grid{grid-template-columns:1fr; gap:20px;}
+    #zdz .test-card-main{grid-template-columns:1fr; gap:24px; padding:24px;}
+    #zdz .test-card-side{padding:24px;}
+    #zdz .gallery-grid{grid-template-columns:repeat(2, 1fr); gap:16px;}
+    #zdz .gallery-title{font-size:24px;}
   }
   @media(max-width:480px){
     #zdz .w{padding:0 20px;}
@@ -356,6 +405,11 @@ const STYLES = `
     #zdz .price-big{font-size:52px;}
     #zdz .btn{width:100%; justify-content:center; padding:14px 20px; font-size:11px;}
     #zdz .video-foot .meta{font-size:9px; letter-spacing:0.1em; line-height:1.4; text-align:center;}
+    #zdz .test-card-main, #zdz .test-card-side{padding:20px;}
+    #zdz .test-quote{font-size:14px;}
+    #zdz .gallery-grid{grid-template-columns:repeat(2, 1fr); gap:12px;}
+    #zdz .gallery-caption{padding:12px;}
+    #zdz .gallery-student-name{font-size:13px;}
   }
   @media(max-width:360px){
     #zdz .w{padding:0 16px;}
@@ -585,6 +639,157 @@ const zdzFaqList = [
     a: "Você tem 7 dias de garantia. Se entrar, assistir e sentir que não é pra você, é só pedir dentro desse prazo que devolvemos 100% do valor, sem burocracia.",
   },
 ];
+
+interface TestimonialData {
+  id: string;
+  name: string;
+  role: string;
+  text: string;
+  highlight?: string;
+  artworkImage?: string;
+  artworkTitle?: string;
+  avatarLetter?: string;
+}
+
+interface StudentGalleryData {
+  id: string;
+  name: string;
+  category: string;
+  image: string;
+}
+
+const zdzFeaturedTestimonials: TestimonialData[] = [
+  {
+    id: "charles",
+    name: "Charles",
+    role: "Aluno ZBrush do Zero",
+    avatarLetter: "C",
+    highlight: "Evolução de 1000%",
+    text: "Comecei na impressão 3D há mais ou menos um ano, mas quando tentei usar o ZBrush fiquei muito frustrado. A gente fica igual cego em tiroteio quando não tem um rumo. Adquiri o curso e logo no primeiro vídeo vi que foi a coisa certa. Hoje, ao chegar no final e ver meu modelo pronto, que começou de uma esfera, ainda estou espantado com o resultado. Muita gente desiste só de abrir o programa. Eu quase desisti, mas continuei firme e já evoluí 1000%.",
+    artworkImage: "/images/alunos/charles-2.png",
+    artworkTitle: "Modelo Finalizado · Charles"
+  },
+  {
+    id: "francisco",
+    name: "Francisco",
+    role: "Aluno ZBrush do Zero",
+    avatarLetter: "F",
+    highlight: "Autonomia & Segurança",
+    text: "Ganhei muito mais autonomia no processo, segurança mesmo. Antes ficava inseguro ao fazer qualquer coisa no software. Além das dicas, a didática me deu um raciocínio de pipeline e do próprio programa que me faltava antes."
+  }
+];
+
+const zdzStudentGallery: StudentGalleryData[] = [
+  {
+    id: "gal-charles",
+    name: "Charles",
+    category: "Escultura 3D · ZBrush",
+    image: "/images/alunos/charles-2.png"
+  },
+  {
+    id: "gal-jonatan-1",
+    name: "Jonatan",
+    category: "Modelagem & Colecionável",
+    image: "/images/alunos/jonatan-1.png"
+  },
+  {
+    id: "gal-jonatan-2",
+    name: "Jonatan",
+    category: "Personagem Estilizado",
+    image: "/images/alunos/jonatan-2.png"
+  },
+  {
+    id: "gal-junior",
+    name: "Junior",
+    category: "Escultura Digital 3D",
+    image: "/images/alunos/junior-1.png"
+  }
+];
+
+function StudentImageFrame({ 
+  src, 
+  alt, 
+  title, 
+  onImageClick 
+}: { 
+  src: string; 
+  alt: string; 
+  title: string; 
+  onImageClick?: (src: string) => void;
+}) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div 
+      className="gallery-img-wrap"
+      id={`zdz-student-img-${alt.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+      onClick={() => {
+        if (!hasError && onImageClick) onImageClick(src);
+      }}
+    >
+      {!hasError ? (
+        <img 
+          src={src} 
+          alt={alt} 
+          loading="lazy" 
+          onError={() => setHasError(true)}
+        />
+      ) : (
+        <div className="gallery-placeholder">
+          <ImageIcon />
+          <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--ink)' }}>{title}</span>
+          <span style={{ fontSize: '11px', color: 'var(--muted2)' }}>Trabalho do Aluno</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TestimonialArtworkBox({
+  src,
+  alt,
+  tag,
+  onImageClick
+}: {
+  src: string;
+  alt: string;
+  tag: string;
+  onImageClick?: (src: string) => void;
+}) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div 
+      className="test-artwork-box"
+      id="zdz-charles-artwork-preview"
+      onClick={() => {
+        if (!hasError && onImageClick) onImageClick(src);
+      }}
+    >
+      {!hasError ? (
+        <>
+          <img 
+            src={src} 
+            alt={alt} 
+            loading="lazy" 
+            onError={() => setHasError(true)} 
+          />
+          <div className="test-artwork-tag">{tag}</div>
+        </>
+      ) : (
+        <div className="test-artwork-placeholder">
+          <Sparkles />
+          <div style={{ fontFamily: 'var(--n)', fontSize: '13px', fontWeight: 700, color: '#fff' }}>
+            {tag}
+          </div>
+          <div style={{ fontSize: '11px', color: 'var(--muted)' }}>
+            Do zero ao modelo finalizado no curso
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ZbrushDoZero() {
   const [lbImg, setLbImg] = useState<string | null>(null);
@@ -1217,6 +1422,105 @@ export default function ZbrushDoZero() {
                     </ul>
                   </div>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section: Prova Social - Depoimentos e Galeria dos Alunos */}
+          <section className="testimonials-sec" id="zdz-depoimentos">
+            <div className="w">
+              <div className="cyber-heading rv" style={{ textAlign: 'center', marginBottom: '56px' }}>
+                <div className="cyber-ey">Depoimentos reais</div>
+                <h2 className="cyber-hs">O QUE OS ALUNOS <span className="grad">ESTÃO DIZENDO</span></h2>
+              </div>
+
+              {/* PARTE 1: Depoimentos em Destaque */}
+              <div className="test-grid rv d1">
+                {/* Card 1: Charles (Maior, com imagem do trabalho ao lado do texto) */}
+                <div className="test-card-main" id="zdz-test-card-charles">
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                        <div className="test-stars">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={16} />
+                          ))}
+                        </div>
+                        <span className="test-highlight">Evolução de 1000%</span>
+                      </div>
+
+                      <blockquote className="test-quote">
+                        "Comecei na impressão 3D há mais ou menos um ano, mas quando tentei usar o ZBrush fiquei muito frustrado. A gente fica igual cego em tiroteio quando não tem um rumo. Adquiri o curso e logo no primeiro vídeo vi que foi a coisa certa. Hoje, ao chegar no final e ver meu modelo pronto, que começou de uma esfera, ainda estou espantado com o resultado. Muita gente desiste só de abrir o programa. Eu quase desisti, mas continuei firme e já evoluí 1000%."
+                      </blockquote>
+                    </div>
+
+                    <div className="test-author">
+                      <div className="test-avatar">C</div>
+                      <div className="test-author-info">
+                        <span className="test-name">Charles</span>
+                        <span className="test-role">Aluno ZBrush do Zero</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <TestimonialArtworkBox 
+                    src="/images/alunos/charles-2.png"
+                    alt="Modelo finalizado do aluno Charles"
+                    tag="Resultado Final · Charles"
+                    onImageClick={(imgSrc) => setLbImg(imgSrc)}
+                  />
+                </div>
+
+                {/* Card 2: Francisco (Texto focado em didática e autonomia) */}
+                <div className="test-card-side" id="zdz-test-card-francisco">
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                      <div className="test-stars">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} size={16} />
+                        ))}
+                      </div>
+                      <span className="test-highlight" style={{ color: '#00e5ff', background: 'rgba(0,229,255,0.1)', borderColor: 'rgba(0,229,255,0.3)' }}>Autonomia & Didática</span>
+                    </div>
+
+                    <blockquote className="test-quote side">
+                      "Ganhei muito mais autonomia no processo, segurança mesmo. Antes ficava inseguro ao fazer qualquer coisa no software. Além das dicas, a didática me deu um raciocínio de pipeline e do próprio programa que me faltava antes."
+                    </blockquote>
+                  </div>
+
+                  <div className="test-author">
+                    <div className="test-avatar" style={{ background: 'linear-gradient(135deg, #00e5ff, #8b5cf6)' }}>F</div>
+                    <div className="test-author-info">
+                      <span className="test-name">Francisco</span>
+                      <span className="test-role">Aluno ZBrush do Zero</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* PARTE 2: Galeria de Imagens dos Alunos */}
+              <div className="gallery-header rv d2">
+                <div className="ey" style={{ marginBottom: '8px' }}>Galeria da Comunidade</div>
+                <h3 className="gallery-title">
+                  Feito por alunos <span className="grad" style={{ background: 'linear-gradient(90deg,#e633a8,#00e5ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>do zero</span>
+                </h3>
+              </div>
+
+              <div className="gallery-grid rv d3">
+                {zdzStudentGallery.map((item) => (
+                  <div key={item.id} className="gallery-card" id={`zdz-student-card-${item.name.toLowerCase()}-${item.id}`}>
+                    <StudentImageFrame 
+                      src={item.image}
+                      alt={`Trabalho de ${item.name}`}
+                      title={item.name}
+                      onImageClick={(imgSrc) => setLbImg(imgSrc)}
+                    />
+                    <div className="gallery-caption">
+                      <div className="gallery-student-name">{item.name}</div>
+                      <div className="gallery-tag">{item.category}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
