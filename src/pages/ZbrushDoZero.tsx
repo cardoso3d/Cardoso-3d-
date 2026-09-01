@@ -225,6 +225,27 @@ const STYLES = `
   #zdz .price-feats li:first-child{border-top:none;}
   #zdz .price-feats .num{font-family:var(--d);font-size:13px;color:var(--purpleHi);min-width:24px;}
 
+  /* Social Proof Bar inside Price Card */
+  #zdz .price-badge-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:16px;background:none;border:none;padding:0;font-size:12px;color:var(--muted);font-family:var(--n);cursor:pointer;transition:color 0.2s;}
+  #zdz .price-badge-link:hover{color:var(--purpleHi);}
+  #zdz .price-badge-link strong{color:var(--purpleHi);text-decoration:underline;text-underline-offset:3px;}
+
+  #zdz .price-card-proof{border-top:1px solid var(--border);background:linear-gradient(90deg,rgba(139,92,246,0.08),rgba(230,51,168,0.04));padding:22px 36px;display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom-left-radius:15px;border-bottom-right-radius:15px;}
+  #zdz .price-proof-left{display:flex;align-items:center;gap:18px;}
+  #zdz .price-proof-avatars{display:flex;align-items:center;}
+  #zdz .price-proof-avatar-item{width:46px;height:46px;border-radius:50%;border:2px solid #8b5cf6;overflow:hidden;margin-left:-12px;background:#140820;cursor:pointer;transition:transform 0.25s ease, z-index 0.25s ease, border-color 0.25s ease;box-shadow:0 4px 12px rgba(0,0,0,0.6);position:relative;}
+  #zdz .price-proof-avatar-item:first-child{margin-left:0;}
+  #zdz .price-proof-avatar-item:hover{transform:scale(1.2) translateY(-3px);z-index:10;border-color:var(--magenta);}
+  #zdz .price-proof-avatar-item img{width:100%;height:100%;object-fit:cover;display:block;}
+  #zdz .price-proof-text{display:flex;flex-direction:column;gap:2px;}
+  #zdz .price-proof-badge{font-family:var(--n);font-size:10px;font-weight:800;color:var(--purpleHi);letter-spacing:0.14em;text-transform:uppercase;}
+  #zdz .price-proof-title{font-family:var(--n);font-size:14px;font-weight:700;color:var(--ink);line-height:1.3;}
+  #zdz .price-proof-sub{font-family:var(--n);font-size:12px;color:var(--muted);line-height:1.3;}
+  #zdz .price-proof-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:99px;background:rgba(255,255,255,0.06);border:1px solid rgba(183,148,246,0.35);color:#fff;font-family:var(--n);font-size:12px;font-weight:700;letter-spacing:0.04em;cursor:pointer;transition:all 0.25s ease;white-space:nowrap;flex-shrink:0;}
+  #zdz .price-proof-btn:hover{background:rgba(139,92,246,0.25);border-color:var(--purpleHi);transform:translateY(-2px);box-shadow:0 4px 16px rgba(139,92,246,0.35);}
+  #zdz .price-proof-btn svg{transition:transform 0.25s ease;}
+  #zdz .price-proof-btn:hover svg{transform:translateY(2px);}
+
   /* Social Proof / Testimonials & Student Gallery */
   #zdz .testimonials-sec{padding:96px 0; border-top:1px solid var(--border); position:relative;}
   #zdz .test-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:24px; align-items:stretch;}
@@ -348,6 +369,9 @@ const STYLES = `
     #zdz .price-head{padding:32px 20px 20px;}
     #zdz .price-amt, #zdz .price-feats{padding:32px 20px;}
     #zdz .price-feats li{font-size:13px; padding:10px 0;}
+    #zdz .price-card-proof{flex-direction:column;align-items:stretch;padding:20px;gap:16px;}
+    #zdz .price-proof-left{flex-direction:column;align-items:flex-start;gap:12px;}
+    #zdz .price-proof-btn{width:100%;justify-content:center;padding:12px 18px;}
     #zdz .port-item{width:260px;}
     #zdz .hero-img{width:100%; margin-top:32px;}
     #zdz .marquee .row{font-size:20px; gap:24px;}
@@ -1431,6 +1455,14 @@ export default function ZbrushDoZero() {
     }
   };
 
+  const scrollToStudents = (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    const el = document.getElementById('zdz-depoimentos');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
     const els = document.querySelectorAll('#zdz .rv')
     const obs = new IntersectionObserver(entries => {
@@ -1481,6 +1513,7 @@ export default function ZbrushDoZero() {
             <nav className="nav-links">
               <a href="#curso" id="zdz-nav-curso">Curso</a>
               <a href="#modulos" id="zdz-nav-modulos">Módulos</a>
+              <a href="#zdz-depoimentos" id="zdz-nav-alunos">Alunos</a>
               <a href="#garantia" id="zdz-nav-garantia">Garantia</a>
               <a href="#zdz-oferta" className="highlight" id="zdz-nav-oferta">Oferta</a>
             </nav>
@@ -1850,6 +1883,17 @@ export default function ZbrushDoZero() {
                     >
                       Quero começar agora <span className="arrow">→</span>
                     </a>
+
+                    {/* Direct Quick Link under CTA */}
+                    <button 
+                      type="button" 
+                      className="price-badge-link"
+                      onClick={scrollToStudents}
+                      id="zdz-price-sublink-students"
+                    >
+                      <span>🎨 Quer ver quem já começou?</span>
+                      <strong>Ver trabalhos dos alunos ↓</strong>
+                    </button>
                   </div>
                   <div className="price-feats">
                     <div className="heading">O que você recebe</div>
@@ -1859,6 +1903,40 @@ export default function ZbrushDoZero() {
                       ))}
                     </ul>
                   </div>
+                </div>
+
+                {/* Direct Visual Student Showcase Bar attached to the price card */}
+                <div className="price-card-proof">
+                  <div className="price-proof-left">
+                    <div className="price-proof-avatars" title="Clique para ampliar o modelo">
+                      {zdzStudentGallery.map((student) => (
+                        <div 
+                          key={student.id} 
+                          className="price-proof-avatar-item"
+                          title={`Ver modelo 3D de ${student.name} (${student.category})`}
+                          onClick={() => setLbImg(student.image)}
+                        >
+                          <img src={student.image} alt={`Trabalho de ${student.name}`} loading="lazy" />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="price-proof-text">
+                      <div className="price-proof-badge">Comunidade &amp; Resultados</div>
+                      <div className="price-proof-title">Veja os modelos criados por alunos saindo do zero</div>
+                      <div className="price-proof-sub">Pessoas reais modelando personagens e miniaturas prontas para impressão 3D</div>
+                    </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    className="price-proof-btn"
+                    onClick={scrollToStudents}
+                    id="zdz-price-see-students-btn"
+                  >
+                    <span>Ver Galeria &amp; Depoimentos</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
