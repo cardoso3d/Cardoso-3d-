@@ -7,7 +7,8 @@ if (typeof window !== 'undefined') {
   // Fallback to classic window.onerror to return true and completely silence 'Script error.'
   window.onerror = function (message, url, line, col, error) {
     const msgStr = String(message || '');
-    if (msgStr.includes('Script error') || !url || url.includes('youtube.com') || url.includes('ytimg.com')) {
+    const urlStr = String(url || '');
+    if (!message || msgStr.includes('Script error') || !url || urlStr.includes('youtube.com') || urlStr.includes('ytimg.com') || urlStr.includes('wistia.com') || urlStr.includes('cardoso3d.com')) {
       return true; // Prevents the fire of default error handler
     }
     return false;
@@ -15,14 +16,15 @@ if (typeof window !== 'undefined') {
 
   window.addEventListener('error', (e) => {
     // Suppress benign third-party script errors (e.g. tracking pixels, GTM, YT iframe) in sandboxed preview
-    if (e.message === 'Script error.' || e.message?.includes('Script error') || !e.filename) {
+    const msgStr = String(e.message || '');
+    if (!e.message || msgStr === 'Script error.' || msgStr.includes('Script error') || !e.filename) {
       e.preventDefault();
       e.stopPropagation();
     }
   }, true);
 
   window.addEventListener('unhandledrejection', (e) => {
-    if (e.reason && (e.reason.message === 'Script error.' || e.reason.message?.includes('Script error'))) {
+    if (!e || !e.reason || e.reason.message === 'Script error.' || e.reason.message?.includes('Script error')) {
       e.preventDefault();
       e.stopPropagation();
     }

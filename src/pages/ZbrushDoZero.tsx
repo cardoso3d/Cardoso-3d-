@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useMemo } from 'react'
 import { Play, Pause, Volume2, VolumeX, Volume1, ChevronDown, X, Star, Quote, Sparkles, Image as ImageIcon } from 'lucide-react'
 import { buildZdzCheckoutUrl } from '../utils/tracking'
 
@@ -11,7 +11,7 @@ const STYLES = `
   #zdz *{box-sizing:border-box;word-wrap:break-word;overflow-wrap:break-word;}
   #zdz a{color:inherit;text-decoration:none;}
   #zdz .hd,#zdz .hs,#zdz .cyber-hs,#zdz h1,#zdz h2,#zdz h3,#zdz h4{word-wrap:break-word;overflow-wrap:break-word;word-break:keep-all;}
-  #zdz::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(900px 600px at 80% -10%,rgba(139,92,246,0.18),transparent 60%),radial-gradient(700px 500px at -10% 30%,rgba(58,15,87,0.45),transparent 65%),radial-gradient(600px 400px at 50% 110%,rgba(230,51,168,0.12),transparent 70%),linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;}
+  #zdz::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(900px 600px at 80% -10%,rgba(139,92,246,0.18),transparent 60%),radial-gradient(700px 500px at -10% 30%,rgba(58,15,87,0.45),transparent 65%),radial-gradient(600px 400px at 50% 110%,rgba(230,51,168,0.12),transparent 70%),linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;will-change:transform;transform:translateZ(0);}
   #zdz main{position:relative;z-index:1;}
   #zdz .w{max-width:1080px;margin:0 auto;padding:0 56px;position:relative;}
   #zdz .nav{display:flex;justify-content:space-between;align-items:center;padding:24px 56px;position:relative;z-index:10;}
@@ -45,13 +45,13 @@ const STYLES = `
   #zdz .hero p.sub{font-family:var(--n);font-size:17px;color:var(--muted);max-width:560px;margin:24px auto 32px;line-height:1.5;}
   #zdz .hero .micro{font-family:var(--n);font-size:11px;color:var(--muted2);letter-spacing:0.22em;text-transform:uppercase;margin-top:18px;}
   #zdz .aurora{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
-  #zdz .aurora .orb{position:absolute;border-radius:50%;filter:blur(80px);}
+  #zdz .aurora .orb{position:absolute;border-radius:50%;filter:blur(60px);will-change:transform,opacity;transform:translateZ(0);}
   #zdz .aurora .o1{width:600px;height:400px;background:radial-gradient(circle,rgba(139,92,246,0.22) 0%,transparent 70%);top:-100px;left:50%;animation:zdzO1 6s ease-in-out infinite;}
   #zdz .aurora .o2{width:400px;height:300px;background:radial-gradient(circle,rgba(230,51,168,0.15) 0%,transparent 70%);top:40%;right:-80px;animation:zdzO2 7s ease-in-out infinite;}
   #zdz .aurora .o3{width:350px;height:250px;background:radial-gradient(circle,rgba(100,20,180,0.2) 0%,transparent 70%);bottom:-60px;left:-40px;animation:zdzO3 8s ease-in-out infinite;}
-  @keyframes zdzO1{0%,100%{opacity:.7;transform:translateX(-50%) scale(1);}50%{opacity:1;transform:translateX(-50%) scale(1.1);}}
-  @keyframes zdzO2{0%,100%{opacity:.5;transform:scale(1);}50%{opacity:.9;transform:scale(1.15);}}
-  @keyframes zdzO3{0%,100%{opacity:.6;transform:scale(1);}50%{opacity:1;transform:scale(1.08);}}
+  @keyframes zdzO1{0%,100%{opacity:.7;transform:translateX(-50%) scale(1) translateZ(0);}50%{opacity:1;transform:translateX(-50%) scale(1.1) translateZ(0);}}
+  @keyframes zdzO2{0%,100%{opacity:.5;transform:scale(1) translateZ(0);}50%{opacity:.9;transform:scale(1.15) translateZ(0);}}
+  @keyframes zdzO3{0%,100%{opacity:.6;transform:scale(1) translateZ(0);}50%{opacity:1;transform:scale(1.08) translateZ(0);}}
   #zdz .hero-img{margin:64px auto 0;max-width:720px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(135deg,#1a0626,#0e0014 60%,#2a0d3d);position:relative;overflow:hidden;box-shadow:0 30px 80px -20px rgba(139,92,246,0.25);}
   #zdz .hero-img::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 30% 35%,rgba(255,255,255,0.18),transparent 60%),radial-gradient(50% 50% at 75% 65%,rgba(230,51,168,0.22),transparent 70%);z-index:1;pointer-events:none;}
   #zdz .hero-img .bust{display:block;width:100%;height:auto;opacity:.95;position:relative;z-index:0;}
@@ -166,14 +166,10 @@ const STYLES = `
   #zdz .about-bio p { font-family: var(--n); font-size: 16px; color: var(--muted); line-height: 1.6; margin: 0; }
   #zdz .about-bio p.lead { font-family: var(--n); font-size: 19px; font-style: normal; color: var(--ink); font-weight: 600; line-height: 1.5; }
   #zdz .about-collab { font-family: var(--n); font-size: 12px; font-weight: 600; color: var(--purpleHi); letter-spacing: 0.1em; text-transform: uppercase; padding-top: 20px; border-top: 1px solid var(--border); line-height: 1.5; }
-  #zdz .port-wrap { margin-top: 80px; overflow: hidden; position: relative; width: 100%; display: flex; user-select: none; }
-  #zdz .port-track { display: flex; gap: 16px; width: max-content; animation: zdzPortMarquee 40s linear infinite; will-change: transform; }
-  #zdz .port-wrap:hover .port-track { animation-play-state: paused; }
-  @keyframes zdzPortMarquee {
-    0% { transform: translate3d(0, 0, 0); }
-    100% { transform: translate3d(-50%, 0, 0); }
-  }
-  #zdz .port-item { width: 320px; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid var(--border); background: #140820; flex-shrink: 0; user-select: none; }
+  #zdz .port-wrap { margin-top: 80px; overflow: hidden; position: relative; width: 100%; display: flex; user-select: none; -webkit-user-select: none; padding: 10px 0; cursor: grab; touch-action: pan-y; }
+  #zdz .port-wrap:active { cursor: grabbing; }
+  #zdz .port-track { display: flex; gap: 16px; width: max-content; will-change: transform; transform: translate3d(0, 0, 0); }
+  #zdz .port-item { width: 320px; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid var(--border); background: #140820; flex-shrink: 0; user-select: none; -webkit-user-select: none; }
   #zdz .port-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; pointer-events: none; -webkit-user-drag: none; }
   #zdz .port-item:hover img { transform: scale(1.05); }
 
@@ -231,19 +227,16 @@ const STYLES = `
 
   /* Social Proof / Testimonials & Student Gallery */
   #zdz .testimonials-sec{padding:96px 0; border-top:1px solid var(--border); position:relative;}
-  #zdz .test-grid{display:grid; grid-template-columns:1.35fr 1fr; gap:24px; align-items:stretch;}
+  #zdz .test-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:24px; align-items:stretch;}
   
-  #zdz .test-card-main{background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:32px; display:grid; grid-template-columns:1.2fr 0.8fr; gap:28px; position:relative; overflow:hidden; box-shadow:0 20px 40px -15px rgba(0,0,0,0.5);}
+  #zdz .test-card-main{background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:28px; display:grid; grid-template-columns:1.15fr 0.85fr; gap:20px; position:relative; overflow:hidden; box-shadow:0 20px 40px -15px rgba(0,0,0,0.5);}
   #zdz .test-card-main::before{content:""; position:absolute; inset:0; background:radial-gradient(circle at 10% 20%, rgba(230,51,168,0.12), transparent 60%); pointer-events:none;}
-  
-  #zdz .test-card-side{background:linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:32px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden; box-shadow:0 20px 40px -15px rgba(0,0,0,0.5);}
-  #zdz .test-card-side::before{content:""; position:absolute; inset:0; background:radial-gradient(circle at 90% 10%, rgba(0,229,255,0.1), transparent 60%); pointer-events:none;}
+  #zdz .test-card-main.cyan-accent::before{background:radial-gradient(circle at 90% 10%, rgba(0,229,255,0.12), transparent 60%);}
 
   #zdz .test-stars{display:flex; gap:4px; color:#facc15; margin-bottom:16px;}
   #zdz .test-stars svg{width:16px; height:16px; fill:#facc15;}
-  #zdz .test-quote{font-family:var(--n); font-size:15px; color:var(--ink); line-height:1.65; margin:0 0 24px; position:relative; z-index:1; font-weight:400;}
-  #zdz .test-quote.side{font-size:16px; line-height:1.7;}
-  #zdz .test-highlight{display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--purpleHi); background:rgba(139,92,246,0.12); border:1px solid rgba(183,148,246,0.25); padding:4px 10px; border-radius:99px; margin-bottom:16px;}
+  #zdz .test-quote{font-family:var(--n); font-size:14px; color:var(--ink); line-height:1.6; margin:0 0 20px; position:relative; z-index:1; font-weight:400;}
+  #zdz .test-highlight{display:inline-block; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--purpleHi); background:rgba(139,92,246,0.12); border:1px solid rgba(183,148,246,0.25); padding:4px 10px; border-radius:99px; margin-bottom:14px;}
   
   #zdz .test-author{display:flex; align-items:center; gap:12px; margin-top:auto; position:relative; z-index:1;}
   #zdz .test-avatar{width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, var(--purple), var(--magenta)); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:16px; color:#fff; flex-shrink:0; box-shadow:0 4px 12px rgba(230,51,168,0.35);}
@@ -251,27 +244,28 @@ const STYLES = `
   #zdz .test-name{font-family:var(--n); font-size:16px; font-weight:700; color:#fff;}
   #zdz .test-role{font-family:var(--n); font-size:12px; color:var(--muted); font-weight:500;}
 
-  #zdz .test-artwork-box{border-radius:14px; border:1px solid rgba(255,255,255,0.1); background:linear-gradient(135deg, rgba(20,8,32,0.9), rgba(10,6,18,0.95)); overflow:hidden; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:220px; cursor:pointer; transition:transform 0.3s ease, border-color 0.3s ease;}
+  #zdz .test-artwork-box{border-radius:14px; border:1px solid rgba(255,255,255,0.12); background:#0c0614; overflow:hidden; position:relative; display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:240px; height:100%; cursor:pointer; transition:transform 0.3s ease, border-color 0.3s ease;}
   #zdz .test-artwork-box:hover{transform:scale(1.02); border-color:var(--purpleHi);}
-  #zdz .test-artwork-box img{width:100%; height:100%; object-fit:cover; display:block;}
-  #zdz .test-artwork-tag{position:absolute; bottom:10px; left:10px; right:10px; font-family:var(--n); font-size:10px; font-weight:700; letter-spacing:0.1em; color:#fff; background:rgba(10,6,18,0.85); backdrop-filter:blur(6px); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.12); text-align:center; text-transform:uppercase;}
+  #zdz .test-artwork-box img{width:100%; height:100%; object-fit:cover; object-position:center; display:block; transition:transform 0.5s ease;}
+  #zdz .test-artwork-box:hover img{transform:scale(1.06);}
+  #zdz .test-artwork-tag{position:absolute; bottom:8px; left:8px; right:8px; font-family:var(--n); font-size:10px; font-weight:700; letter-spacing:0.08em; color:#fff; background:rgba(10,6,18,0.85); backdrop-filter:blur(6px); padding:6px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); text-align:center; text-transform:uppercase; z-index:2;}
   #zdz .test-artwork-placeholder{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px; text-align:center; color:var(--muted);}
   #zdz .test-artwork-placeholder svg{width:36px; height:36px; color:var(--purpleHi); opacity:0.8;}
 
-  /* Student Gallery Grid */
-  #zdz .gallery-header{text-align:center; margin-top:72px; margin-bottom:36px;}
+  /* Student Gallery Carousel (Interactive Smooth Infinite Drag & Auto-Scroll) */
+  #zdz .gallery-header{text-align:center; margin-top:80px; margin-bottom:36px;}
   #zdz .gallery-title{font-family:var(--n); font-size:32px; font-weight:800; text-transform:uppercase; letter-spacing:-0.01em; color:#fff;}
-  #zdz .gallery-grid{display:grid; grid-template-columns:repeat(4, 1fr); gap:20px;}
-  #zdz .gallery-card{border:1px solid var(--border); border-radius:16px; background:linear-gradient(145deg, rgba(20,8,32,0.7), rgba(10,6,18,0.8)); overflow:hidden; transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s, box-shadow 0.3s; display:flex; flex-direction:column;}
-  #zdz .gallery-card:hover{transform:translateY(-4px); border-color:rgba(183,148,246,0.4); box-shadow:0 16px 36px -10px rgba(139,92,246,0.3);}
-  #zdz .gallery-img-wrap{aspect-ratio:1/1; position:relative; overflow:hidden; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center; cursor:pointer;}
-  #zdz .gallery-img-wrap img{width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.4s ease;}
-  #zdz .gallery-card:hover .gallery-img-wrap img{transform:scale(1.05);}
-  #zdz .gallery-placeholder{width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:radial-gradient(circle at center, rgba(139,92,246,0.1), transparent 70%); color:var(--muted2); padding:16px; text-align:center;}
-  #zdz .gallery-placeholder svg{width:32px; height:32px; color:var(--purpleHi); opacity:0.6;}
-  #zdz .gallery-caption{padding:16px; border-top:1px solid var(--border); background:rgba(255,255,255,0.01); display:flex; flex-direction:column; gap:4px;}
-  #zdz .gallery-student-name{font-family:var(--n); font-size:15px; font-weight:700; color:#fff;}
-  #zdz .gallery-tag{font-family:var(--n); font-size:11px; font-weight:600; color:var(--purpleHi); letter-spacing:0.06em; text-transform:uppercase;}
+  #zdz .student-port-wrap{overflow:hidden; position:relative; width:100vw; margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); display:flex; user-select:none; -webkit-user-select:none; padding:14px 0; cursor:grab; touch-action:pan-y;}
+  #zdz .student-port-wrap:active{cursor:grabbing;}
+  #zdz .student-port-track{display:flex; gap:20px; width:max-content; will-change:transform; transform:translate3d(0,0,0);}
+  #zdz .student-gallery-card{width:290px; border:1px solid var(--border); border-radius:16px; background:linear-gradient(145deg, rgba(20,8,32,0.85), rgba(10,6,18,0.95)); overflow:hidden; transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s, box-shadow 0.3s; display:flex; flex-direction:column; flex-shrink:0; cursor:pointer;}
+  #zdz .student-gallery-card:hover{transform:translateY(-4px); border-color:rgba(183,148,246,0.5); box-shadow:0 16px 36px -10px rgba(139,92,246,0.35);}
+  #zdz .student-img-wrap{aspect-ratio:1/1; width:100%; position:relative; overflow:hidden; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center;}
+  #zdz .student-img-wrap img{width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.4s ease; pointer-events:none; -webkit-user-drag:none;}
+  #zdz .student-gallery-card:hover .student-img-wrap img{transform:scale(1.06);}
+  #zdz .student-caption{padding:16px; border-top:1px solid var(--border); background:rgba(255,255,255,0.02); display:flex; flex-direction:column; gap:4px;}
+  #zdz .student-name{font-family:var(--n); font-size:15px; font-weight:700; color:#fff;}
+  #zdz .student-tag{font-family:var(--n); font-size:11px; font-weight:600; color:var(--purpleHi); letter-spacing:0.06em; text-transform:uppercase;}
 
   /* FAQ */
   #zdz .faq{padding: 96px 0; border-top: 1px solid var(--border);}
@@ -674,8 +668,10 @@ const zdzFeaturedTestimonials: TestimonialData[] = [
     name: "Francisco",
     role: "Aluno ZBrush do Zero",
     avatarLetter: "F",
-    highlight: "Autonomia & Segurança",
-    text: "Ganhei muito mais autonomia no processo, segurança mesmo. Antes ficava inseguro ao fazer qualquer coisa no software. Além das dicas, a didática me deu um raciocínio de pipeline e do próprio programa que me faltava antes."
+    highlight: "Autonomia & Didática",
+    text: "Ganhei muito mais autonomia no processo, segurança mesmo. Antes ficava inseguro ao fazer qualquer coisa no software. Além das dicas, a didática me deu um raciocínio de pipeline e do próprio programa que me faltava antes.",
+    artworkImage: "/images/alunos/francisco-2.jpg",
+    artworkTitle: "Modelo Finalizado · Francisco"
   }
 ];
 
@@ -703,6 +699,12 @@ const zdzStudentGallery: StudentGalleryData[] = [
     name: "Junior",
     category: "Escultura Digital 3D",
     image: "/images/alunos/junior-1.png"
+  },
+  {
+    id: "gal-francisco-1",
+    name: "Francisco",
+    category: "Modelo & Impressão 3D",
+    image: "/images/alunos/francisco-1.jpg"
   }
 ];
 
@@ -745,15 +747,459 @@ function StudentImageFrame({
   );
 }
 
+function InteractiveStudentMarquee({
+  items,
+  onImageClick
+}: {
+  items: StudentGalleryData[];
+  onImageClick: (imgSrc: string) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  const posRef = useRef(0);
+  const isInteractingRef = useRef(false);
+  const isHoveredRef = useRef(false);
+  const isVisibleRef = useRef(false);
+  const startXRef = useRef(0);
+  const velocityRef = useRef(0);
+  const lastXRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const dragDistanceRef = useRef(0);
+  const singleSetWidthRef = useRef(0);
+
+  // Repeat items 4 times to ensure enough track width for smooth infinite wrapping
+  const repeatedItems = useMemo(() => items.concat(items).concat(items).concat(items), [items]);
+
+  useEffect(() => {
+    let animId: number | null = null;
+    let lastFrameTime = performance.now();
+
+    const updateWidth = () => {
+      if (trackRef.current) {
+        singleSetWidthRef.current = trackRef.current.scrollWidth / 4;
+      }
+    };
+
+    updateWidth();
+
+    // Resize observer only recalculates width when container or track resizes
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && trackRef.current) {
+      ro = new ResizeObserver(() => {
+        updateWidth();
+      });
+      ro.observe(trackRef.current);
+    }
+
+    const loop = (now: number) => {
+      if (!isVisibleRef.current || document.hidden) {
+        animId = null;
+        return;
+      }
+
+      const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+      lastFrameTime = now;
+
+      const track = trackRef.current;
+      const singleSetWidth = singleSetWidthRef.current;
+
+      if (track && singleSetWidth > 0) {
+        if (!isInteractingRef.current) {
+          if (Math.abs(velocityRef.current) > 5) {
+            posRef.current += velocityRef.current * dt;
+            velocityRef.current *= Math.pow(0.88, dt * 60);
+          } else {
+            velocityRef.current = 0;
+            // Smooth auto-scroll; slows down slightly on hover
+            const speed = isHoveredRef.current ? 14 : 40;
+            posRef.current += speed * dt;
+          }
+        }
+
+        posRef.current = ((posRef.current % singleSetWidth) + singleSetWidth) % singleSetWidth;
+        track.style.transform = `translate3d(${-posRef.current}px, 0, 0)`;
+      }
+
+      animId = requestAnimationFrame(loop);
+    };
+
+    const startAnimation = () => {
+      if (!animId && isVisibleRef.current && !document.hidden) {
+        lastFrameTime = performance.now();
+        animId = requestAnimationFrame(loop);
+      }
+    };
+
+    const stopAnimation = () => {
+      if (animId) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+    };
+
+    // Intersection observer to only run rAF when visible in viewport
+    let io: IntersectionObserver | null = null;
+    if (containerRef.current) {
+      io = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          isVisibleRef.current = entry.isIntersecting;
+          if (entry.isIntersecting) {
+            updateWidth();
+            startAnimation();
+          } else {
+            stopAnimation();
+          }
+        },
+        { threshold: 0.05 }
+      );
+      io.observe(containerRef.current);
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopAnimation();
+      } else if (isVisibleRef.current) {
+        startAnimation();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      stopAnimation();
+      io?.disconnect();
+      ro?.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, []);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    isInteractingRef.current = true;
+    startXRef.current = e.clientX;
+    lastXRef.current = e.clientX;
+    dragDistanceRef.current = 0;
+    velocityRef.current = 0;
+    lastTimeRef.current = performance.now();
+
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isInteractingRef.current) return;
+    const currentX = e.clientX;
+    const deltaX = currentX - lastXRef.current;
+    
+    dragDistanceRef.current += Math.abs(deltaX);
+    posRef.current -= deltaX;
+
+    const now = performance.now();
+    const dt = (now - lastTimeRef.current) / 1000;
+    if (dt > 0.005) {
+      velocityRef.current = -deltaX / dt;
+    }
+    lastXRef.current = currentX;
+    lastTimeRef.current = now;
+  };
+
+  const handlePointerUpOrCancel = (e: React.PointerEvent) => {
+    if (!isInteractingRef.current) return;
+    isInteractingRef.current = false;
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
+
+    // Clamp flick velocity
+    if (velocityRef.current > 1400) velocityRef.current = 1400;
+    if (velocityRef.current < -1400) velocityRef.current = -1400;
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(delta) > 1) {
+      posRef.current += delta * 0.9;
+      velocityRef.current = 0;
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="student-port-wrap rv d3"
+      id="zdz-student-infinite-carousel"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUpOrCancel}
+      onPointerCancel={handlePointerUpOrCancel}
+      onMouseEnter={() => { isHoveredRef.current = true; }}
+      onMouseLeave={() => { isHoveredRef.current = false; }}
+      onWheel={handleWheel}
+      style={{ touchAction: 'pan-y' }}
+    >
+      <div ref={trackRef} className="student-port-track">
+        {repeatedItems.map((item, idx) => (
+          <div
+            key={`${item.id}-${idx}`}
+            className="student-gallery-card"
+            id={`zdz-student-card-${item.name.toLowerCase()}-${idx}`}
+            onClick={(e) => {
+              if (dragDistanceRef.current > 6) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+              }
+              onImageClick(item.image);
+            }}
+          >
+            <div className="student-img-wrap">
+              <img
+                src={item.image}
+                alt={`Trabalho de ${item.name}`}
+                loading="lazy"
+                draggable={false}
+              />
+            </div>
+            <div className="student-caption">
+              <div className="student-name">{item.name}</div>
+              <div className="student-tag">{item.category}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function InteractiveAuthorPortfolioMarquee({
+  images,
+  onImageClick
+}: {
+  images: string[];
+  onImageClick: (imgSrc: string) => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  const posRef = useRef(0);
+  const isInteractingRef = useRef(false);
+  const isHoveredRef = useRef(false);
+  const isVisibleRef = useRef(false);
+  const startXRef = useRef(0);
+  const velocityRef = useRef(0);
+  const lastXRef = useRef(0);
+  const lastTimeRef = useRef(0);
+  const dragDistanceRef = useRef(0);
+  const singleSetWidthRef = useRef(0);
+
+  // Repeat items 4 times to ensure enough track width for smooth infinite wrapping
+  const repeatedImages = useMemo(() => images.concat(images).concat(images).concat(images), [images]);
+
+  useEffect(() => {
+    let animId: number | null = null;
+    let lastFrameTime = performance.now();
+
+    const updateWidth = () => {
+      if (trackRef.current) {
+        singleSetWidthRef.current = trackRef.current.scrollWidth / 4;
+      }
+    };
+
+    updateWidth();
+
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && trackRef.current) {
+      ro = new ResizeObserver(() => {
+        updateWidth();
+      });
+      ro.observe(trackRef.current);
+    }
+
+    const loop = (now: number) => {
+      if (!isVisibleRef.current || document.hidden) {
+        animId = null;
+        return;
+      }
+
+      const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+      lastFrameTime = now;
+
+      const track = trackRef.current;
+      const singleSetWidth = singleSetWidthRef.current;
+
+      if (track && singleSetWidth > 0) {
+        if (!isInteractingRef.current) {
+          if (Math.abs(velocityRef.current) > 5) {
+            posRef.current += velocityRef.current * dt;
+            velocityRef.current *= Math.pow(0.88, dt * 60);
+          } else {
+            velocityRef.current = 0;
+            // Smooth auto-scroll; slows down slightly on hover
+            const speed = isHoveredRef.current ? 14 : 38;
+            posRef.current += speed * dt;
+          }
+        }
+
+        posRef.current = ((posRef.current % singleSetWidth) + singleSetWidth) % singleSetWidth;
+        track.style.transform = `translate3d(${-posRef.current}px, 0, 0)`;
+      }
+
+      animId = requestAnimationFrame(loop);
+    };
+
+    const startAnimation = () => {
+      if (!animId && isVisibleRef.current && !document.hidden) {
+        lastFrameTime = performance.now();
+        animId = requestAnimationFrame(loop);
+      }
+    };
+
+    const stopAnimation = () => {
+      if (animId) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+    };
+
+    let io: IntersectionObserver | null = null;
+    if (containerRef.current) {
+      io = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          isVisibleRef.current = entry.isIntersecting;
+          if (entry.isIntersecting) {
+            updateWidth();
+            startAnimation();
+          } else {
+            stopAnimation();
+          }
+        },
+        { threshold: 0.05 }
+      );
+      io.observe(containerRef.current);
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopAnimation();
+      } else if (isVisibleRef.current) {
+        startAnimation();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      stopAnimation();
+      io?.disconnect();
+      ro?.disconnect();
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, []);
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    isInteractingRef.current = true;
+    startXRef.current = e.clientX;
+    lastXRef.current = e.clientX;
+    dragDistanceRef.current = 0;
+    velocityRef.current = 0;
+    lastTimeRef.current = performance.now();
+
+    try {
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isInteractingRef.current) return;
+    const currentX = e.clientX;
+    const deltaX = currentX - lastXRef.current;
+    
+    dragDistanceRef.current += Math.abs(deltaX);
+    posRef.current -= deltaX;
+
+    const now = performance.now();
+    const dt = (now - lastTimeRef.current) / 1000;
+    if (dt > 0.005) {
+      velocityRef.current = -deltaX / dt;
+    }
+    lastXRef.current = currentX;
+    lastTimeRef.current = now;
+  };
+
+  const handlePointerUpOrCancel = (e: React.PointerEvent) => {
+    if (!isInteractingRef.current) return;
+    isInteractingRef.current = false;
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
+
+    if (velocityRef.current > 1400) velocityRef.current = 1400;
+    if (velocityRef.current < -1400) velocityRef.current = -1400;
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(delta) > 1) {
+      posRef.current += delta * 0.9;
+      velocityRef.current = 0;
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="port-wrap rv"
+      id="zdz-author-infinite-carousel"
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerUpOrCancel}
+      onPointerCancel={handlePointerUpOrCancel}
+      onMouseEnter={() => { isHoveredRef.current = true; }}
+      onMouseLeave={() => { isHoveredRef.current = false; }}
+      onWheel={handleWheel}
+      style={{ touchAction: 'pan-y' }}
+    >
+      <div ref={trackRef} className="port-track">
+        {repeatedImages.map((img, i) => (
+          <div
+            key={i}
+            className="port-item"
+            onClick={(e) => {
+              if (dragDistanceRef.current > 6) {
+                e.preventDefault();
+                e.stopPropagation();
+                return;
+              }
+              onImageClick(img);
+            }}
+          >
+            <img 
+              src={img} 
+              alt={`Trabalho ${(i % images.length) + 1}`} 
+              loading="lazy" 
+              draggable={false} 
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function TestimonialArtworkBox({
   src,
   alt,
   tag,
+  id,
   onImageClick
 }: {
   src: string;
   alt: string;
   tag: string;
+  id?: string;
   onImageClick?: (src: string) => void;
 }) {
   const [hasError, setHasError] = useState(false);
@@ -761,7 +1207,7 @@ function TestimonialArtworkBox({
   return (
     <div 
       className="test-artwork-box"
-      id="zdz-charles-artwork-preview"
+      id={id || `zdz-art-${alt.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
       onClick={() => {
         if (!hasError && onImageClick) onImageClick(src);
       }}
@@ -992,14 +1438,15 @@ export default function ZbrushDoZero() {
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' })
     els.forEach(el => obs.observe(el))
 
-    const cta = document.getElementById('zdz-cta')
+    const cta = document.getElementById('zdz-floating-cta') || document.querySelector('.zdz-cta')
     let shown = false
     let isTicking = false
     const onScroll = () => {
       if (!isTicking) {
         window.requestAnimationFrame(() => {
-          const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight)
-          if (!shown && pct > 0.4) { cta?.classList.add('on'); shown = true }
+          const scrollH = document.documentElement.scrollHeight - window.innerHeight;
+          const pct = scrollH > 0 ? window.scrollY / scrollH : 0;
+          if (!shown && pct > 0.35) { cta?.classList.add('on'); shown = true }
           const oferta = document.getElementById('zdz-oferta')
           if (oferta) {
             const r = oferta.getBoundingClientRect()
@@ -1240,20 +1687,11 @@ export default function ZbrushDoZero() {
               </div>
             </div>
             
-            {/* Smooth GPU-Accelerated Infinite Portfolio Carousel */}
-            <div className="port-wrap rv">
-              <div className="port-track">
-                {portImgs.concat(portImgs).map((img, i) => (
-                  <div 
-                    key={i} 
-                    className="port-item" 
-                    onClick={() => setLbImg(img)}
-                  >
-                    <img src={img} alt={`Trabalho ${(i % portImgs.length) + 1}`} loading="lazy" />
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Interactive Smooth Infinite Portfolio Carousel (Touch & Mouse Drag) */}
+            <InteractiveAuthorPortfolioMarquee 
+              images={portImgs} 
+              onImageClick={(imgSrc) => setLbImg(imgSrc)} 
+            />
           </section>
 
           <section>
@@ -1464,6 +1902,7 @@ export default function ZbrushDoZero() {
                   </div>
 
                   <TestimonialArtworkBox 
+                    id="zdz-charles-artwork-preview"
                     src="/images/alunos/charles-2.png"
                     alt="Modelo finalizado do aluno Charles"
                     tag="Resultado Final · Charles"
@@ -1471,58 +1910,57 @@ export default function ZbrushDoZero() {
                   />
                 </div>
 
-                {/* Card 2: Francisco (Texto focado em didática e autonomia) */}
-                <div className="test-card-side" id="zdz-test-card-francisco">
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                      <div className="test-stars">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} size={16} />
-                        ))}
+                {/* Card 2: Francisco (Com imagem francisco-2 do trabalho ao lado do texto) */}
+                <div className="test-card-main cyan-accent" id="zdz-test-card-francisco">
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                        <div className="test-stars">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={16} />
+                          ))}
+                        </div>
+                        <span className="test-highlight" style={{ color: '#00e5ff', background: 'rgba(0,229,255,0.1)', borderColor: 'rgba(0,229,255,0.3)' }}>Autonomia & Didática</span>
                       </div>
-                      <span className="test-highlight" style={{ color: '#00e5ff', background: 'rgba(0,229,255,0.1)', borderColor: 'rgba(0,229,255,0.3)' }}>Autonomia & Didática</span>
+
+                      <blockquote className="test-quote">
+                        "Ganhei muito mais autonomia no processo, segurança mesmo. Antes ficava inseguro ao fazer qualquer coisa no software. Além das dicas, a didática me deu um raciocínio de pipeline e do próprio programa que me faltava antes."
+                      </blockquote>
                     </div>
 
-                    <blockquote className="test-quote side">
-                      "Ganhei muito mais autonomia no processo, segurança mesmo. Antes ficava inseguro ao fazer qualquer coisa no software. Além das dicas, a didática me deu um raciocínio de pipeline e do próprio programa que me faltava antes."
-                    </blockquote>
-                  </div>
-
-                  <div className="test-author">
-                    <div className="test-avatar" style={{ background: 'linear-gradient(135deg, #00e5ff, #8b5cf6)' }}>F</div>
-                    <div className="test-author-info">
-                      <span className="test-name">Francisco</span>
-                      <span className="test-role">Aluno ZBrush do Zero</span>
+                    <div className="test-author">
+                      <div className="test-avatar" style={{ background: 'linear-gradient(135deg, #00e5ff, #8b5cf6)' }}>F</div>
+                      <div className="test-author-info">
+                        <span className="test-name">Francisco</span>
+                        <span className="test-role">Aluno ZBrush do Zero</span>
+                      </div>
                     </div>
                   </div>
+
+                  <TestimonialArtworkBox 
+                    id="zdz-francisco-artwork-preview"
+                    src="/images/alunos/francisco-2.jpg"
+                    alt="Modelo finalizado do aluno Francisco"
+                    tag="Resultado Final · Francisco"
+                    onImageClick={(imgSrc) => setLbImg(imgSrc)}
+                  />
                 </div>
               </div>
 
-              {/* PARTE 2: Galeria de Imagens dos Alunos */}
+              {/* PARTE 2: Galeria de Imagens dos Alunos (Rolagem Infinita Suave) */}
               <div className="gallery-header rv d2">
                 <div className="ey" style={{ marginBottom: '8px' }}>Galeria da Comunidade</div>
                 <h3 className="gallery-title">
                   Feito por alunos <span className="grad" style={{ background: 'linear-gradient(90deg,#e633a8,#00e5ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>do zero</span>
                 </h3>
               </div>
-
-              <div className="gallery-grid rv d3">
-                {zdzStudentGallery.map((item) => (
-                  <div key={item.id} className="gallery-card" id={`zdz-student-card-${item.name.toLowerCase()}-${item.id}`}>
-                    <StudentImageFrame 
-                      src={item.image}
-                      alt={`Trabalho de ${item.name}`}
-                      title={item.name}
-                      onImageClick={(imgSrc) => setLbImg(imgSrc)}
-                    />
-                    <div className="gallery-caption">
-                      <div className="gallery-student-name">{item.name}</div>
-                      <div className="gallery-tag">{item.category}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
+
+            {/* Carrossel Interativo com Rolagem Infinita & Toque/Arrasto (PC e Mobile) */}
+            <InteractiveStudentMarquee 
+              items={zdzStudentGallery} 
+              onImageClick={(imgSrc) => setLbImg(imgSrc)} 
+            />
           </section>
 
           {/* Section: Perguntas Frequentes */}

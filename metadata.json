@@ -2,5 +2,7 @@
   "name": "Remix Cardoso3D",
   "description": "Plataforma central para os cursos de escultura digital e impressão 3D de Vinícius Cardoso.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
