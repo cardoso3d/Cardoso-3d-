@@ -628,11 +628,16 @@ function useDraggableCarousel(speed = 0.5) {
   const [isHovered, setIsHovered] = React.useState(false);
 
   React.useEffect(() => {
-    let animationId: number;
+    let animationId: number | null = null;
+    let isVisible = false;
     const el = trackRef.current;
     if (!el) return;
 
     const scroll = () => {
+      if (!isVisible || document.hidden) {
+        animationId = null;
+        return;
+      }
       if (!isHovered && !isDragging) {
         el.scrollLeft += speed;
         if (el.scrollLeft >= el.scrollWidth / 2) {
@@ -642,8 +647,43 @@ function useDraggableCarousel(speed = 0.5) {
       animationId = requestAnimationFrame(scroll);
     };
 
-    animationId = requestAnimationFrame(scroll);
-    return () => cancelAnimationFrame(animationId);
+    const start = () => {
+      if (!animationId && isVisible && !document.hidden) {
+        animationId = requestAnimationFrame(scroll);
+      }
+    };
+
+    const stop = () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+    };
+
+    let io: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      io = new IntersectionObserver((entries) => {
+        isVisible = entries[0]?.isIntersecting ?? false;
+        if (isVisible) start();
+        else stop();
+      }, { threshold: 0.05 });
+      io.observe(el);
+    } else {
+      isVisible = true;
+      start();
+    }
+
+    const onVisibilityChange = () => {
+      if (document.hidden) stop();
+      else if (isVisible) start();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+
+    return () => {
+      stop();
+      io?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, [isHovered, isDragging, speed]);
 
   const onMouseDown = (e: React.MouseEvent) => {

@@ -65,12 +65,12 @@ const STYLES = `
   #zdz .av-txt{display:flex;flex-direction:column;justify-content:center;}
 
   #zdz .marquee{padding:24px 0;border-top:1px solid rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.05);overflow:hidden;background:rgba(255,255,255,0.02);}
-  #zdz .marquee .track{display:flex;width:max-content;animation:zdzMq 28s linear infinite;}
+  #zdz .marquee .track{display:flex;width:max-content;animation:zdzMq 28s linear infinite;will-change:transform;}
   #zdz .marquee:hover .track{animation-play-state:paused;}
   #zdz .marquee .row{display:flex;align-items:center;gap:48px;font-family:var(--n);font-weight:800;font-size:22px;letter-spacing:0.1em;text-transform:uppercase;white-space:nowrap;color:#fff;padding-right:48px;}
   #zdz .marquee .row .cyan{color:#00e5ff;}
   #zdz .marquee .row .dot{color:#e633a8;font-size:16px;}
-  @keyframes zdzMq{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+  @keyframes zdzMq{0%{transform:translate3d(0,0,0);}100%{transform:translate3d(-50%,0,0);}}
 
   #zdz .pain-cards{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:960px;margin:0 auto;}
   #zdz .pain-card{background:linear-gradient(145deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:32px;display:flex;align-items:center;gap:24px;position:relative;overflow:hidden;}
@@ -155,12 +155,10 @@ const STYLES = `
 
   /* About / Instructor */
   #zdz .about { padding: 96px 0; background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
-  #zdz .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-  #zdz .about-fig { position: relative; aspect-ratio: 4/5; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; background: #140820; box-shadow: 0 20px 50px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.3s ease, border-color 0.3s ease; }
-  #zdz .about-fig:hover { transform: translateY(-3px); border-color: rgba(183,148,246,0.5); }
-  #zdz .about-fig img { width: 100%; height: 100%; object-fit: cover; opacity: 1; display: block; transition: transform 0.4s ease; }
-  #zdz .about-fig:hover img { transform: scale(1.03); }
-  #zdz .about-badge { position: absolute; bottom: 20px; left: 20px; font-family: var(--n); font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #fff; background: rgba(10,6,18,0.85); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 2; }
+  #zdz .about-grid { display: grid; grid-template-columns: 280px 1fr; gap: 56px; align-items: center; }
+  #zdz .about-fig { position: relative; max-width: 280px; width: 100%; aspect-ratio: 4/5; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; background: #140820; box-shadow: 0 16px 40px rgba(0,0,0,0.45); cursor: default; user-select: none; }
+  #zdz .about-fig img { width: 100%; height: 100%; object-fit: cover; opacity: 1; display: block; pointer-events: none; -webkit-user-drag: none; }
+  #zdz .about-badge { position: absolute; bottom: 16px; left: 16px; font-family: var(--n); font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; color: #fff; background: rgba(10,6,18,0.85); backdrop-filter: blur(8px); padding: 6px 14px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 6px 20px rgba(0,0,0,0.4); z-index: 2; }
   #zdz .about-stats { margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   #zdz .stat-num { font-family: var(--d); font-size: 44px; color: #00e5ff; line-height: 1; letter-spacing: 0.02em; }
   #zdz .stat-txt { font-size: 13px; color: var(--muted); font-weight: 500; margin-top: 4px; font-family: var(--n); }
@@ -173,16 +171,15 @@ const STYLES = `
   #zdz .zoom-badge { position: absolute; top: 12px; right: 12px; background: rgba(10,6,18,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(183,148,246,0.4); color: #fff; font-size: 11px; font-weight: 700; font-family: var(--n); letter-spacing: 0.04em; padding: 6px 12px; border-radius: 99px; display: flex; align-items: center; gap: 6px; opacity: 0; transform: translateY(-4px); transition: opacity 0.25s ease, transform 0.25s ease, border-color 0.2s; pointer-events: none; z-index: 5; box-shadow: 0 4px 14px rgba(0,0,0,0.6); }
   #zdz .port-item:hover .zoom-badge,
   #zdz .student-gallery-card:hover .zoom-badge,
-  #zdz .test-artwork-box:hover .zoom-badge,
-  #zdz .about-fig:hover .zoom-badge { opacity: 1; transform: translateY(0); border-color: var(--magenta); }
+  #zdz .test-artwork-box:hover .zoom-badge { opacity: 1; transform: translateY(0); border-color: var(--magenta); }
   @media(max-width: 768px) {
     #zdz .zoom-badge { opacity: 0.9; transform: translateY(0); font-size: 10px; padding: 4px 8px; top: 8px; right: 8px; }
   }
 
   #zdz .port-wrap { margin-top: 80px; overflow: hidden; position: relative; width: 100%; display: flex; user-select: none; -webkit-user-select: none; padding: 10px 0; cursor: grab; touch-action: pan-y; }
   #zdz .port-wrap:active { cursor: grabbing; }
-  #zdz .port-track { display: flex; gap: 16px; width: max-content; will-change: transform; transform: translate3d(0, 0, 0); }
-  #zdz .port-item { width: 320px; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid var(--border); background: #140820; flex-shrink: 0; user-select: none; -webkit-user-select: none; transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
+  #zdz .port-track { display: flex; gap: 16px; width: max-content; will-change: transform; transform: translate3d(0, 0, 0); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  #zdz .port-item { width: 320px; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid var(--border); background: #140820; flex-shrink: 0; user-select: none; -webkit-user-select: none; transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; contain: paint; }
   #zdz .port-item:hover { transform: translateY(-4px); border-color: rgba(183,148,246,0.5); box-shadow: 0 16px 36px -10px rgba(139,92,246,0.35); }
   #zdz .port-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; pointer-events: none; -webkit-user-drag: none; }
   #zdz .port-item:hover img { transform: scale(1.06); }
@@ -307,8 +304,8 @@ const STYLES = `
   #zdz .gallery-title{font-family:var(--n); font-size:32px; font-weight:800; text-transform:uppercase; letter-spacing:-0.01em; color:#fff;}
   #zdz .student-port-wrap{overflow:hidden; position:relative; width:100vw; margin-left:calc(-50vw + 50%); margin-right:calc(-50vw + 50%); display:flex; user-select:none; -webkit-user-select:none; padding:14px 0; cursor:grab; touch-action:pan-y;}
   #zdz .student-port-wrap:active{cursor:grabbing;}
-  #zdz .student-port-track{display:flex; gap:20px; width:max-content; will-change:transform; transform:translate3d(0,0,0);}
-  #zdz .student-gallery-card{width:290px; border:1px solid var(--border); border-radius:16px; background:linear-gradient(145deg, rgba(20,8,32,0.85), rgba(10,6,18,0.95)); overflow:hidden; transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s, box-shadow 0.3s; display:flex; flex-direction:column; flex-shrink:0; cursor:pointer;}
+  #zdz .student-port-track{display:flex; gap:20px; width:max-content; will-change:transform; transform:translate3d(0,0,0); backface-visibility: hidden; -webkit-backface-visibility: hidden;}
+  #zdz .student-gallery-card{width:290px; border:1px solid var(--border); border-radius:16px; background:linear-gradient(145deg, rgba(20,8,32,0.85), rgba(10,6,18,0.95)); overflow:hidden; transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s, box-shadow 0.3s; display:flex; flex-direction:column; flex-shrink:0; cursor:pointer; contain: paint;}
   #zdz .student-gallery-card:hover{transform:translateY(-4px); border-color:rgba(183,148,246,0.5); box-shadow:0 16px 36px -10px rgba(139,92,246,0.35);}
   #zdz .student-img-wrap{aspect-ratio:1/1; width:100%; position:relative; overflow:hidden; background:rgba(255,255,255,0.02); display:flex; align-items:center; justify-content:center;}
   #zdz .student-img-wrap img{width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.4s ease; pointer-events:none; -webkit-user-drag:none;}
@@ -381,7 +378,7 @@ const STYLES = `
     #zdz .modules-head p{text-align:left; font-size:15px;}
     #zdz .modules-grid,#zdz .fit-grid,#zdz .price-body,#zdz .about-grid{grid-template-columns:1fr;}
     #zdz .about-grid{gap:36px;}
-    #zdz .about-fig{max-width:380px;margin:0 auto;width:100%;}
+    #zdz .about-fig{max-width:240px;margin:0 auto;width:100%;}
     #zdz .fit-col{border-right:none;border-bottom:1px solid var(--border); padding:24px;}
     #zdz .fit-head svg{width:20px;height:20px;}
     #zdz .fit-col .ctrl svg{width:20px;height:20px;}
@@ -648,14 +645,14 @@ interface AuthorPortfolioItem {
 }
 
 const zdzAuthorPortfolio: AuthorPortfolioItem[] = [
-  { img: "https://3dnapose.com/wp-content/uploads/2025/11/1.jpg", title: "Spider Noir", category: "Modelado para a Polymind Studio" },
-  { img: "https://3dnapose.com/wp-content/uploads/2025/11/2.jpg", title: "Quarteto Fantástico", category: "Modelado para a Polymind Studio" },
-  { img: "https://3dnapose.com/wp-content/uploads/2025/11/3.jpg", title: "Electro", category: "Modelado para a Polymind Studio" },
-  { img: "https://3dnapose.com/wp-content/uploads/2025/11/4.jpg", title: "Spider-Man", category: "Modelado para a Polymind Studio" },
-  { img: "https://3dnapose.com/wp-content/uploads/2025/11/5.jpg", title: "Penguin", category: "Modelado para a Polymind Studio" },
-  { img: "https://3dnapose.com/wp-content/uploads/2025/11/6.jpg", title: "Red Sonja", category: "Modelado para a Polymind Studio" },
-  { img: "https://3dnapose.com/wp-content/uploads/2025/11/7.jpg", title: "Spider-Punk", category: "Modelado para a Red Sparrow Studio" },
-  { img: "https://3dnapose.com/wp-content/uploads/2025/11/8.jpg", title: "Mysterio", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos-vini/spiderman.jpg", title: "Spider-Man", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos-vini/dr. doom.jpg", title: "Dr. Doom", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos-vini/venom.jpg", title: "Venom", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos-vini/conan.jpg", title: "Conan", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos-vini/quartetofantastic.jpg", title: "Quarteto Fantástico", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos-vini/electro.jpg", title: "Electro", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos-vini/spider punk.jpg", title: "Spider-Punk", category: "Modelado para a Red Sparrow Studio" },
+  { img: "/images/trabalhos-vini/mysterio.jpg", title: "Mysterio", category: "Modelado para a Polymind Studio" },
 ];
 
 const portImgs = zdzAuthorPortfolio.map(p => p.img);
@@ -829,8 +826,8 @@ function InteractiveStudentMarquee({
   const dragDistanceRef = useRef(0);
   const singleSetWidthRef = useRef(0);
 
-  // Repeat items 4 times to ensure enough track width for smooth infinite wrapping
-  const repeatedItems = useMemo(() => items.concat(items).concat(items).concat(items), [items]);
+  // Repeat items 3 times to ensure enough track width for smooth infinite wrapping while keeping memory light
+  const repeatedItems = useMemo(() => items.concat(items).concat(items), [items]);
 
   useEffect(() => {
     let animId: number | null = null;
@@ -838,7 +835,7 @@ function InteractiveStudentMarquee({
 
     const updateWidth = () => {
       if (trackRef.current) {
-        singleSetWidthRef.current = trackRef.current.scrollWidth / 4;
+        singleSetWidthRef.current = trackRef.current.scrollWidth / 3;
       }
     };
 
@@ -1037,6 +1034,7 @@ function InteractiveStudentMarquee({
                 src={item.image}
                 alt={`Trabalho de ${item.name}`}
                 loading="lazy"
+                decoding="async"
                 draggable={false}
               />
               <div className="zoom-badge">
@@ -1090,9 +1088,9 @@ function InteractiveAuthorPortfolioMarquee({
     return zdzAuthorPortfolio;
   }, [items, images]);
 
-  // Repeat items 4 times to ensure enough track width for smooth infinite wrapping
+  // Repeat items 3 times to ensure enough track width for smooth infinite wrapping while saving memory
   const repeatedItems = useMemo(
-    () => portfolioList.concat(portfolioList).concat(portfolioList).concat(portfolioList),
+    () => portfolioList.concat(portfolioList).concat(portfolioList),
     [portfolioList]
   );
 
@@ -1102,7 +1100,7 @@ function InteractiveAuthorPortfolioMarquee({
 
     const updateWidth = () => {
       if (trackRef.current) {
-        singleSetWidthRef.current = trackRef.current.scrollWidth / 4;
+        singleSetWidthRef.current = trackRef.current.scrollWidth / 3;
       }
     };
 
@@ -1297,6 +1295,7 @@ function InteractiveAuthorPortfolioMarquee({
               src={item.img} 
               alt={item.title} 
               loading="lazy" 
+              decoding="async" 
               draggable={false} 
             />
             <div className="zoom-badge">
@@ -1622,18 +1621,38 @@ export default function ZbrushDoZero() {
 
     const cta = document.getElementById('zdz-floating-cta') || document.querySelector('.zdz-cta')
     let shown = false
+    let isOfertaVisible = false
+
+    const updateCtaVisibility = () => {
+      if (shown && !isOfertaVisible) {
+        cta?.classList.add('on')
+      } else {
+        cta?.classList.remove('on')
+      }
+    }
+
+    const oferta = document.getElementById('zdz-oferta')
+    let ofertaObs: IntersectionObserver | null = null
+    if (oferta) {
+      ofertaObs = new IntersectionObserver((entries) => {
+        isOfertaVisible = entries[0]?.isIntersecting ?? false
+        updateCtaVisibility()
+      }, { threshold: 0.02 })
+      ofertaObs.observe(oferta)
+    }
+
     let isTicking = false
     const onScroll = () => {
       if (!isTicking) {
         window.requestAnimationFrame(() => {
-          const scrollH = document.documentElement.scrollHeight - window.innerHeight;
-          const pct = scrollH > 0 ? window.scrollY / scrollH : 0;
-          if (!shown && pct > 0.35) { cta?.classList.add('on'); shown = true }
-          const oferta = document.getElementById('zdz-oferta')
-          if (oferta) {
-            const r = oferta.getBoundingClientRect()
-            if (r.top < window.innerHeight && r.bottom > 0) cta?.classList.remove('on')
-            else if (shown) cta?.classList.add('on')
+          const scrollH = document.documentElement.scrollHeight - window.innerHeight
+          const pct = scrollH > 0 ? window.scrollY / scrollH : 0
+          if (!shown && pct > 0.35) {
+            shown = true
+            updateCtaVisibility()
+          } else if (shown && pct <= 0.35) {
+            shown = false
+            updateCtaVisibility()
           }
           isTicking = false
         })
@@ -1641,7 +1660,11 @@ export default function ZbrushDoZero() {
       }
     }
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => { obs.disconnect(); window.removeEventListener('scroll', onScroll) }
+    return () => {
+      obs.disconnect()
+      ofertaObs?.disconnect()
+      window.removeEventListener('scroll', onScroll)
+    }
   }, [])
 
   return (
@@ -1845,24 +1868,13 @@ export default function ZbrushDoZero() {
                 <h2 className="cyber-hs">Quem vai <span className="grad">te ensinar</span></h2>
               </div>
               <div className="about-grid">
-                <div 
-                  className="about-fig rv"
-                  role="button"
-                  tabIndex={0}
-                  title="Clique para ampliar a foto"
-                  onClick={() => openLightbox("https://3dnapose.com/wp-content/uploads/2025/11/fotinha-do-vini-2.png", "Vinicius Cardoso", "Instrutor & Artista 3D")}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      openLightbox("https://3dnapose.com/wp-content/uploads/2025/11/fotinha-do-vini-2.png", "Vinicius Cardoso", "Instrutor & Artista 3D");
-                    }
-                  }}
-                >
-                  <img src="https://3dnapose.com/wp-content/uploads/2025/11/fotinha-do-vini-2.png" alt="Vinicius Cardoso" />
-                  <div className="zoom-badge">
-                    <ZoomIn size={13} />
-                    <span>Ver foto</span>
-                  </div>
+                <div className="about-fig rv">
+                  <img 
+                    src="https://3dnapose.com/wp-content/uploads/2025/11/fotinha-do-vini-2.png" 
+                    alt="Vinicius Cardoso" 
+                    loading="lazy" 
+                    decoding="async" 
+                  />
                   <div className="about-badge">VINICIUS CARDOSO</div>
                 </div>
                 <div className="about-bio rv">

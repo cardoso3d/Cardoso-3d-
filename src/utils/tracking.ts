@@ -11,8 +11,11 @@ export const TRACKING_KEYS = [
   'fbclid'
 ];
 
+let memoryParamsCache: Record<string, string> | null = null;
+
 // Helper to get all stored parameters from both sessionStorage, localStorage, and current URL
 export const getCapturedTrackingParams = (): Record<string, string> => {
+  if (memoryParamsCache) return memoryParamsCache;
   const params: Record<string, string> = {};
 
   if (typeof window === 'undefined') return params;
@@ -69,6 +72,7 @@ export const getCapturedTrackingParams = (): Record<string, string> => {
     console.error('Error parsing search params:', e);
   }
 
+  memoryParamsCache = params;
   return params;
 };
 
@@ -132,6 +136,7 @@ export const getStoredParams = (): Record<string, string> => {
 
 // Helper to save params to both storages
 export const saveStoredParams = (params: Record<string, string>) => {
+  memoryParamsCache = params;
   try {
     const dataStr = JSON.stringify(params);
     sessionStorage.setItem(STORAGE_KEY, dataStr);
@@ -337,21 +342,29 @@ export const initTrackingSystem = () => {
   propagateTrackingParamsToLinks();
   propagateTrackingParamsToForms();
 
-  // Loop every 500ms for dynamic content detection
+  // Periodic check (every 3s) for any newly injected elements
   const intervalId = setInterval(() => {
     propagateTrackingParamsToLinks();
     propagateTrackingParamsToForms();
-  }, 500);
+  }, 3000);
 
-  // Interaction event listeners
-  const events = ['mouseover', 'touchstart', 'mousedown', 'click'];
-  const triggerPropagation = () => {
-    propagateTrackingParamsToLinks();
-    propagateTrackingParamsToForms();
+  // Interaction event listeners: click and touchstart only (delegated, avoid heavy mouseover)
+  const events = ['pointerdown', 'click'];
+  let lastTriggerTime = 0;
+  const triggerPropagation = (e: Event) => {
+    // Only propagate if clicking on or near an anchor or form, or throttled to at most once every 1000ms
+    const now = Date.now();
+    const target = e.target as HTMLElement | null;
+    const isInteractive = target?.closest?.('a, form, button');
+    if (isInteractive || now - lastTriggerTime > 1000) {
+      lastTriggerTime = now;
+      propagateTrackingParamsToLinks();
+      propagateTrackingParamsToForms();
+    }
   };
 
   events.forEach(eventName => {
-    document.addEventListener(eventName, triggerPropagation);
+    document.addEventListener(eventName, triggerPropagation, { passive: true });
   });
 
   return () => {
