@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react'
-import { Play, Pause, Volume2, VolumeX, Volume1, ChevronDown, X, Star, Quote, Sparkles, Image as ImageIcon } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeX, Volume1, ChevronDown, X, Star, Quote, Sparkles, Image as ImageIcon, ZoomIn } from 'lucide-react'
 import { buildZdzCheckoutUrl } from '../utils/tracking'
 
 const WistiaPlayer = 'wistia-player' as any;
@@ -156,9 +156,11 @@ const STYLES = `
   /* About / Instructor */
   #zdz .about { padding: 96px 0; background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
   #zdz .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-  #zdz .about-fig { position: relative; aspect-ratio: 4/5; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; background: #140820; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-  #zdz .about-fig img { width: 100%; height: 100%; object-fit: cover; opacity: 1; display: block; }
-  #zdz .about-badge { position: absolute; bottom: 20px; left: 20px; font-family: var(--n); font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #fff; background: rgba(10,6,18,0.85); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+  #zdz .about-fig { position: relative; aspect-ratio: 4/5; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; background: #140820; box-shadow: 0 20px 50px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.3s ease, border-color 0.3s ease; }
+  #zdz .about-fig:hover { transform: translateY(-3px); border-color: rgba(183,148,246,0.5); }
+  #zdz .about-fig img { width: 100%; height: 100%; object-fit: cover; opacity: 1; display: block; transition: transform 0.4s ease; }
+  #zdz .about-fig:hover img { transform: scale(1.03); }
+  #zdz .about-badge { position: absolute; bottom: 20px; left: 20px; font-family: var(--n); font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #fff; background: rgba(10,6,18,0.85); backdrop-filter: blur(8px); padding: 8px 16px; border-radius: 99px; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 2; }
   #zdz .about-stats { margin-top: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   #zdz .stat-num { font-family: var(--d); font-size: 44px; color: #00e5ff; line-height: 1; letter-spacing: 0.02em; }
   #zdz .stat-txt { font-size: 13px; color: var(--muted); font-weight: 500; margin-top: 4px; font-family: var(--n); }
@@ -166,20 +168,47 @@ const STYLES = `
   #zdz .about-bio p { font-family: var(--n); font-size: 16px; color: var(--muted); line-height: 1.6; margin: 0; }
   #zdz .about-bio p.lead { font-family: var(--n); font-size: 19px; font-style: normal; color: var(--ink); font-weight: 600; line-height: 1.5; }
   #zdz .about-collab { font-family: var(--n); font-size: 12px; font-weight: 600; color: var(--purpleHi); letter-spacing: 0.1em; text-transform: uppercase; padding-top: 20px; border-top: 1px solid var(--border); line-height: 1.5; }
+  
+  /* Zoom Hint Badge for Clickable Works */
+  #zdz .zoom-badge { position: absolute; top: 12px; right: 12px; background: rgba(10,6,18,0.85); backdrop-filter: blur(8px); border: 1px solid rgba(183,148,246,0.4); color: #fff; font-size: 11px; font-weight: 700; font-family: var(--n); letter-spacing: 0.04em; padding: 6px 12px; border-radius: 99px; display: flex; align-items: center; gap: 6px; opacity: 0; transform: translateY(-4px); transition: opacity 0.25s ease, transform 0.25s ease, border-color 0.2s; pointer-events: none; z-index: 5; box-shadow: 0 4px 14px rgba(0,0,0,0.6); }
+  #zdz .port-item:hover .zoom-badge,
+  #zdz .student-gallery-card:hover .zoom-badge,
+  #zdz .test-artwork-box:hover .zoom-badge,
+  #zdz .about-fig:hover .zoom-badge { opacity: 1; transform: translateY(0); border-color: var(--magenta); }
+  @media(max-width: 768px) {
+    #zdz .zoom-badge { opacity: 0.9; transform: translateY(0); font-size: 10px; padding: 4px 8px; top: 8px; right: 8px; }
+  }
+
   #zdz .port-wrap { margin-top: 80px; overflow: hidden; position: relative; width: 100%; display: flex; user-select: none; -webkit-user-select: none; padding: 10px 0; cursor: grab; touch-action: pan-y; }
   #zdz .port-wrap:active { cursor: grabbing; }
   #zdz .port-track { display: flex; gap: 16px; width: max-content; will-change: transform; transform: translate3d(0, 0, 0); }
-  #zdz .port-item { width: 320px; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid var(--border); background: #140820; flex-shrink: 0; user-select: none; -webkit-user-select: none; }
+  #zdz .port-item { width: 320px; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; cursor: pointer; position: relative; border: 1px solid var(--border); background: #140820; flex-shrink: 0; user-select: none; -webkit-user-select: none; transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
+  #zdz .port-item:hover { transform: translateY(-4px); border-color: rgba(183,148,246,0.5); box-shadow: 0 16px 36px -10px rgba(139,92,246,0.35); }
   #zdz .port-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; pointer-events: none; -webkit-user-drag: none; }
-  #zdz .port-item:hover img { transform: scale(1.05); }
+  #zdz .port-item:hover img { transform: scale(1.06); }
+  
+  #zdz .port-caption { position: absolute; bottom: 0; left: 0; right: 0; padding: 28px 16px 14px; background: linear-gradient(0deg, rgba(10,6,18,0.96) 0%, rgba(10,6,18,0.7) 65%, transparent 100%); display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+  #zdz .port-caption-title { font-family: var(--n); font-size: 15px; font-weight: 700; color: #fff; line-height: 1.25; }
+  #zdz .port-caption-tag { font-family: var(--n); font-size: 11.5px; color: var(--purpleHi); font-weight: 500; line-height: 1.3; }
 
-  /* Lightbox */
-  #zdz .lightbox { position: fixed; inset: 0; background: rgba(10,6,18,0.96); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(8px); }
+  /* Lightbox Modal */
+  #zdz .lightbox { position: fixed; inset: 0; background: rgba(8,4,14,0.95); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; backdrop-filter: blur(12px); padding: 24px; }
   #zdz .lightbox.active { opacity: 1; pointer-events: auto; }
-  #zdz .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 12px; object-fit: contain; box-shadow: 0 40px 100px rgba(0,0,0,0.8); transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid var(--border); }
-  #zdz .lightbox.active img { transform: scale(1); }
-  #zdz .lb-close { position: absolute; top: 28px; right: 28px; background: rgba(255,255,255,0.08); width: 44px; height: 44px; border-radius: 50%; color: #fff; border: 1px solid rgba(255,255,255,0.15); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.2s; }
-  #zdz .lb-close:hover { background: rgba(255,255,255,0.2); transform: scale(1.08); }
+  #zdz .lb-container { position: relative; max-width: 92vw; max-height: 94vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; animation: zdzLbPop 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+  #zdz .lb-img-frame { position: relative; max-width: 90vw; max-height: 78vh; display: flex; align-items: center; justify-content: center; }
+  #zdz .lb-img-frame img { max-width: 90vw; max-height: 78vh; width: auto; height: auto; border-radius: 14px; object-fit: contain; box-shadow: 0 30px 90px rgba(0,0,0,0.9); border: 1px solid rgba(183,148,246,0.3); }
+  #zdz .lb-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; max-width: 640px; background: rgba(20,8,32,0.85); border: 1px solid rgba(183,148,246,0.3); border-radius: 99px; padding: 10px 22px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  #zdz .lb-title { font-family: var(--n); font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2; }
+  #zdz .lb-sub { font-family: var(--n); font-size: 12px; color: var(--purpleHi); font-weight: 500; margin-top: 2px; }
+  #zdz .lb-hint { font-family: var(--n); font-size: 11px; color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+  #zdz .lb-close { position: absolute; top: -14px; right: -14px; background: rgba(20,8,32,0.95); width: 42px; height: 42px; border-radius: 50%; color: #fff; border: 1px solid rgba(183,148,246,0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 8px 24px rgba(0,0,0,0.7); z-index: 10; }
+  #zdz .lb-close:hover { background: var(--magenta); border-color: #fff; transform: scale(1.1); }
+  @keyframes zdzLbPop { 0% { transform: scale(0.94); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @media(max-width: 640px) {
+    #zdz .lb-bar { border-radius: 12px; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 16px; }
+    #zdz .lb-hint { display: none; }
+    #zdz .lb-close { top: -10px; right: -10px; width: 38px; height: 38px; }
+  }
 
   #zdz .gua{padding: 80px 0;}
   #zdz .gua-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;max-width:1040px;margin:0 auto;}
@@ -612,16 +641,24 @@ const MODULES = [
   },
 ]
 
-const portImgs = [
-  "https://3dnapose.com/wp-content/uploads/2025/11/1.jpg",
-  "https://3dnapose.com/wp-content/uploads/2025/11/2.jpg",
-  "https://3dnapose.com/wp-content/uploads/2025/11/3.jpg",
-  "https://3dnapose.com/wp-content/uploads/2025/11/4.jpg",
-  "https://3dnapose.com/wp-content/uploads/2025/11/5.jpg",
-  "https://3dnapose.com/wp-content/uploads/2025/11/6.jpg",
-  "https://3dnapose.com/wp-content/uploads/2025/11/7.jpg",
-  "https://3dnapose.com/wp-content/uploads/2025/11/8.jpg",
+interface AuthorPortfolioItem {
+  img: string;
+  title: string;
+  category: string;
+}
+
+const zdzAuthorPortfolio: AuthorPortfolioItem[] = [
+  { img: "https://3dnapose.com/wp-content/uploads/2025/11/1.jpg", title: "Spider Noir", category: "Modelado para a Polymind Studio" },
+  { img: "https://3dnapose.com/wp-content/uploads/2025/11/2.jpg", title: "Quarteto Fantástico", category: "Modelado para a Polymind Studio" },
+  { img: "https://3dnapose.com/wp-content/uploads/2025/11/3.jpg", title: "Electro", category: "Modelado para a Polymind Studio" },
+  { img: "https://3dnapose.com/wp-content/uploads/2025/11/4.jpg", title: "Spider-Man", category: "Modelado para a Polymind Studio" },
+  { img: "https://3dnapose.com/wp-content/uploads/2025/11/5.jpg", title: "Penguin", category: "Modelado para a Polymind Studio" },
+  { img: "https://3dnapose.com/wp-content/uploads/2025/11/6.jpg", title: "Red Sonja", category: "Modelado para a Polymind Studio" },
+  { img: "https://3dnapose.com/wp-content/uploads/2025/11/7.jpg", title: "Spider-Punk", category: "Modelado para a Red Sparrow Studio" },
+  { img: "https://3dnapose.com/wp-content/uploads/2025/11/8.jpg", title: "Mysterio", category: "Modelado para a Polymind Studio" },
 ];
+
+const portImgs = zdzAuthorPortfolio.map(p => p.img);
 
 const zdzFaqList = [
   {
@@ -776,7 +813,7 @@ function InteractiveStudentMarquee({
   onImageClick
 }: {
   items: StudentGalleryData[];
-  onImageClick: (imgSrc: string) => void;
+  onImageClick: (imgSrc: string, title?: string, subtitle?: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -906,10 +943,6 @@ function InteractiveStudentMarquee({
     dragDistanceRef.current = 0;
     velocityRef.current = 0;
     lastTimeRef.current = performance.now();
-
-    try {
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    } catch {}
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -918,6 +951,16 @@ function InteractiveStudentMarquee({
     const deltaX = currentX - lastXRef.current;
     
     dragDistanceRef.current += Math.abs(deltaX);
+
+    // Only capture pointer after genuine drag movement (>6px) so simple taps/clicks are never captured
+    if (dragDistanceRef.current > 6) {
+      try {
+        if (!containerRef.current?.hasPointerCapture?.(e.pointerId)) {
+          (containerRef.current as HTMLElement)?.setPointerCapture?.(e.pointerId);
+        }
+      } catch {}
+    }
+
     posRef.current -= deltaX;
 
     const now = performance.now();
@@ -933,7 +976,9 @@ function InteractiveStudentMarquee({
     if (!isInteractingRef.current) return;
     isInteractingRef.current = false;
     try {
-      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      if (containerRef.current?.hasPointerCapture?.(e.pointerId)) {
+        (containerRef.current as HTMLElement)?.releasePointerCapture?.(e.pointerId);
+      }
     } catch {}
 
     // Clamp flick velocity
@@ -968,6 +1013,9 @@ function InteractiveStudentMarquee({
           <div
             key={`${item.id}-${idx}`}
             className="student-gallery-card"
+            role="button"
+            tabIndex={0}
+            title={`Ampliar: Trabalho de ${item.name} (${item.category})`}
             id={`zdz-student-card-${item.name.toLowerCase()}-${idx}`}
             onClick={(e) => {
               if (dragDistanceRef.current > 6) {
@@ -975,7 +1023,13 @@ function InteractiveStudentMarquee({
                 e.stopPropagation();
                 return;
               }
-              onImageClick(item.image);
+              onImageClick(item.image, `Trabalho de ${item.name}`, item.category);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onImageClick(item.image, `Trabalho de ${item.name}`, item.category);
+              }
             }}
           >
             <div className="student-img-wrap">
@@ -985,6 +1039,10 @@ function InteractiveStudentMarquee({
                 loading="lazy"
                 draggable={false}
               />
+              <div className="zoom-badge">
+                <ZoomIn size={12} />
+                <span>Ver maior</span>
+              </div>
             </div>
             <div className="student-caption">
               <div className="student-name">{item.name}</div>
@@ -998,11 +1056,13 @@ function InteractiveStudentMarquee({
 }
 
 function InteractiveAuthorPortfolioMarquee({
+  items,
   images,
   onImageClick
 }: {
-  images: string[];
-  onImageClick: (imgSrc: string) => void;
+  items?: AuthorPortfolioItem[];
+  images?: string[];
+  onImageClick: (imgSrc: string, title?: string, subtitle?: string) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -1018,8 +1078,23 @@ function InteractiveAuthorPortfolioMarquee({
   const dragDistanceRef = useRef(0);
   const singleSetWidthRef = useRef(0);
 
+  const portfolioList = useMemo(() => {
+    if (items && items.length > 0) return items;
+    if (images && images.length > 0) {
+      return images.map((img, i) => ({
+        img,
+        title: `Modelo 3D #${i + 1}`,
+        category: 'Vinicius Cardoso · Escultura 3D'
+      }));
+    }
+    return zdzAuthorPortfolio;
+  }, [items, images]);
+
   // Repeat items 4 times to ensure enough track width for smooth infinite wrapping
-  const repeatedImages = useMemo(() => images.concat(images).concat(images).concat(images), [images]);
+  const repeatedItems = useMemo(
+    () => portfolioList.concat(portfolioList).concat(portfolioList).concat(portfolioList),
+    [portfolioList]
+  );
 
   useEffect(() => {
     let animId: number | null = null;
@@ -1130,10 +1205,6 @@ function InteractiveAuthorPortfolioMarquee({
     dragDistanceRef.current = 0;
     velocityRef.current = 0;
     lastTimeRef.current = performance.now();
-
-    try {
-      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    } catch {}
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -1142,6 +1213,16 @@ function InteractiveAuthorPortfolioMarquee({
     const deltaX = currentX - lastXRef.current;
     
     dragDistanceRef.current += Math.abs(deltaX);
+
+    // Only capture pointer after genuine drag movement (>6px) so simple taps/clicks are never captured
+    if (dragDistanceRef.current > 6) {
+      try {
+        if (!containerRef.current?.hasPointerCapture?.(e.pointerId)) {
+          (containerRef.current as HTMLElement)?.setPointerCapture?.(e.pointerId);
+        }
+      } catch {}
+    }
+
     posRef.current -= deltaX;
 
     const now = performance.now();
@@ -1157,7 +1238,9 @@ function InteractiveAuthorPortfolioMarquee({
     if (!isInteractingRef.current) return;
     isInteractingRef.current = false;
     try {
-      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+      if (containerRef.current?.hasPointerCapture?.(e.pointerId)) {
+        (containerRef.current as HTMLElement)?.releasePointerCapture?.(e.pointerId);
+      }
     } catch {}
 
     if (velocityRef.current > 1400) velocityRef.current = 1400;
@@ -1187,25 +1270,43 @@ function InteractiveAuthorPortfolioMarquee({
       style={{ touchAction: 'pan-y' }}
     >
       <div ref={trackRef} className="port-track">
-        {repeatedImages.map((img, i) => (
+        {repeatedItems.map((item, i) => (
           <div
             key={i}
             className="port-item"
+            role="button"
+            tabIndex={0}
+            title={`Ampliar: ${item.title}`}
+            id={`zdz-author-port-item-${i}`}
             onClick={(e) => {
               if (dragDistanceRef.current > 6) {
                 e.preventDefault();
                 e.stopPropagation();
                 return;
               }
-              onImageClick(img);
+              onImageClick(item.img, item.title, item.category);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onImageClick(item.img, item.title, item.category);
+              }
             }}
           >
             <img 
-              src={img} 
-              alt={`Trabalho ${(i % images.length) + 1}`} 
+              src={item.img} 
+              alt={item.title} 
               loading="lazy" 
               draggable={false} 
             />
+            <div className="zoom-badge">
+              <ZoomIn size={13} />
+              <span>Ver maior</span>
+            </div>
+            <div className="port-caption">
+              <span className="port-caption-title">{item.title}</span>
+              <span className="port-caption-tag">{item.category}</span>
+            </div>
           </div>
         ))}
       </div>
@@ -1218,13 +1319,17 @@ function TestimonialArtworkBox({
   alt,
   tag,
   id,
+  title,
+  subtitle,
   onImageClick
 }: {
   src: string;
   alt: string;
   tag: string;
   id?: string;
-  onImageClick?: (src: string) => void;
+  title?: string;
+  subtitle?: string;
+  onImageClick?: (src: string, title?: string, subtitle?: string) => void;
 }) {
   const [hasError, setHasError] = useState(false);
 
@@ -1232,8 +1337,17 @@ function TestimonialArtworkBox({
     <div 
       className="test-artwork-box"
       id={id || `zdz-art-${alt.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+      role="button"
+      tabIndex={0}
+      title="Clique para ampliar o modelo 3D"
       onClick={() => {
-        if (!hasError && onImageClick) onImageClick(src);
+        if (!hasError && onImageClick) onImageClick(src, title || tag, subtitle);
+      }}
+      onKeyDown={(e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && !hasError && onImageClick) {
+          e.preventDefault();
+          onImageClick(src, title || tag, subtitle);
+        }
       }}
     >
       {!hasError ? (
@@ -1244,6 +1358,10 @@ function TestimonialArtworkBox({
             loading="lazy" 
             onError={() => setHasError(true)} 
           />
+          <div className="zoom-badge">
+            <ZoomIn size={12} />
+            <span>Ver maior</span>
+          </div>
           <div className="test-artwork-tag">{tag}</div>
         </>
       ) : (
@@ -1262,7 +1380,39 @@ function TestimonialArtworkBox({
 }
 
 export default function ZbrushDoZero() {
-  const [lbImg, setLbImg] = useState<string | null>(null);
+  const [lbData, setLbData] = useState<{ src: string; title: string; subtitle?: string } | null>(null);
+  const lbImg = lbData ? lbData.src : null;
+  const setLbImg = (src: string | null) => {
+    if (!src) setLbData(null);
+    else setLbData({ src, title: 'Modelo 3D' });
+  };
+
+  const openLightbox = (src: string, title?: string, subtitle?: string) => {
+    setLbData({
+      src,
+      title: title || 'Modelo 3D',
+      subtitle
+    });
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setLbData(null);
+      }
+    };
+    if (lbData) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [lbData]);
+
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
   const [openModules, setOpenModules] = useState<Record<number, boolean>>({});
   const [hasActivatedSound, setHasActivatedSound] = useState(false);
@@ -1695,8 +1845,24 @@ export default function ZbrushDoZero() {
                 <h2 className="cyber-hs">Quem vai <span className="grad">te ensinar</span></h2>
               </div>
               <div className="about-grid">
-                <div className="about-fig rv">
+                <div 
+                  className="about-fig rv"
+                  role="button"
+                  tabIndex={0}
+                  title="Clique para ampliar a foto"
+                  onClick={() => openLightbox("https://3dnapose.com/wp-content/uploads/2025/11/fotinha-do-vini-2.png", "Vinicius Cardoso", "Instrutor & Artista 3D")}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openLightbox("https://3dnapose.com/wp-content/uploads/2025/11/fotinha-do-vini-2.png", "Vinicius Cardoso", "Instrutor & Artista 3D");
+                    }
+                  }}
+                >
                   <img src="https://3dnapose.com/wp-content/uploads/2025/11/fotinha-do-vini-2.png" alt="Vinicius Cardoso" />
+                  <div className="zoom-badge">
+                    <ZoomIn size={13} />
+                    <span>Ver foto</span>
+                  </div>
                   <div className="about-badge">VINICIUS CARDOSO</div>
                 </div>
                 <div className="about-bio rv">
@@ -1722,8 +1888,9 @@ export default function ZbrushDoZero() {
             
             {/* Interactive Smooth Infinite Portfolio Carousel (Touch & Mouse Drag) */}
             <InteractiveAuthorPortfolioMarquee 
+              items={zdzAuthorPortfolio}
               images={portImgs} 
-              onImageClick={(imgSrc) => setLbImg(imgSrc)} 
+              onImageClick={(imgSrc, title, subtitle) => openLightbox(imgSrc, title, subtitle)} 
             />
           </section>
 
@@ -1913,8 +2080,16 @@ export default function ZbrushDoZero() {
                         <div 
                           key={student.id} 
                           className="price-proof-avatar-item"
+                          role="button"
+                          tabIndex={0}
                           title={`Ver modelo 3D de ${student.name} (${student.category})`}
-                          onClick={() => setLbImg(student.image)}
+                          onClick={() => openLightbox(student.image, `Trabalho de ${student.name}`, student.category)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              openLightbox(student.image, `Trabalho de ${student.name}`, student.category);
+                            }
+                          }}
                         >
                           <img src={student.image} alt={`Trabalho de ${student.name}`} loading="lazy" />
                         </div>
@@ -1984,7 +2159,9 @@ export default function ZbrushDoZero() {
                     src="/images/alunos/charles-2.png"
                     alt="Modelo finalizado do aluno Charles"
                     tag="Resultado Final · Charles"
-                    onImageClick={(imgSrc) => setLbImg(imgSrc)}
+                    title="Modelo finalizado do aluno Charles"
+                    subtitle="Esculpido no ZBrush partindo do zero · Aluno ZBrush do Zero"
+                    onImageClick={(imgSrc, title, subtitle) => openLightbox(imgSrc, title, subtitle)}
                   />
                 </div>
 
@@ -2020,7 +2197,9 @@ export default function ZbrushDoZero() {
                     src="/images/alunos/francisco-2.jpg"
                     alt="Modelo finalizado do aluno Francisco"
                     tag="Resultado Final · Francisco"
-                    onImageClick={(imgSrc) => setLbImg(imgSrc)}
+                    title="Modelo finalizado do aluno Francisco"
+                    subtitle="Esculpido no ZBrush partindo do zero · Aluno ZBrush do Zero"
+                    onImageClick={(imgSrc, title, subtitle) => openLightbox(imgSrc, title, subtitle)}
                   />
                 </div>
               </div>
@@ -2037,7 +2216,7 @@ export default function ZbrushDoZero() {
             {/* Carrossel Interativo com Rolagem Infinita & Toque/Arrasto (PC e Mobile) */}
             <InteractiveStudentMarquee 
               items={zdzStudentGallery} 
-              onImageClick={(imgSrc) => setLbImg(imgSrc)} 
+              onImageClick={(imgSrc, title, subtitle) => openLightbox(imgSrc, title, subtitle)} 
             />
           </section>
 
@@ -2118,22 +2297,40 @@ export default function ZbrushDoZero() {
 
         {/* Lightbox Modal */}
         <div 
-          className={`lightbox ${lbImg ? 'active' : ''}`}
+          className={`lightbox ${lbData ? 'active' : ''}`}
           id="zdz-portfolio-lightbox"
-          onClick={() => setLbImg(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={lbData?.title || "Visualização ampliada do modelo 3D"}
+          onClick={() => setLbData(null)}
         >
-          {lbImg && (
-            <>
-              <img src={lbImg} alt="Preview do modelo" onClick={(e) => e.stopPropagation()} />
-              <button 
-                className="lb-close" 
-                onClick={() => setLbImg(null)} 
-                aria-label="Fechar"
-                id="zdz-portfolio-lightbox-close"
-              >
-                <X size={24} />
-              </button>
-            </>
+          {lbData && (
+            <div className="lb-container" onClick={(e) => e.stopPropagation()}>
+              <div className="lb-img-frame">
+                <img 
+                  src={lbData.src} 
+                  alt={lbData.title || "Preview do modelo ampliado"} 
+                />
+                <button 
+                  className="lb-close" 
+                  onClick={() => setLbData(null)} 
+                  aria-label="Fechar visualização"
+                  title="Fechar (Esc)"
+                  id="zdz-portfolio-lightbox-close"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              {(lbData.title || lbData.subtitle) && (
+                <div className="lb-bar">
+                  <div>
+                    <div className="lb-title">{lbData.title}</div>
+                    {lbData.subtitle && <div className="lb-sub">{lbData.subtitle}</div>}
+                  </div>
+                  <span className="lb-hint">ESC para fechar</span>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
