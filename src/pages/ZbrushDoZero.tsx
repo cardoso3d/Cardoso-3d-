@@ -52,7 +52,7 @@ const STYLES = `
   @keyframes zdzO1{0%,100%{opacity:.7;transform:translateX(-50%) scale(1) translateZ(0);}50%{opacity:1;transform:translateX(-50%) scale(1.1) translateZ(0);}}
   @keyframes zdzO2{0%,100%{opacity:.5;transform:scale(1) translateZ(0);}50%{opacity:.9;transform:scale(1.15) translateZ(0);}}
   @keyframes zdzO3{0%,100%{opacity:.6;transform:scale(1) translateZ(0);}50%{opacity:1;transform:scale(1.08) translateZ(0);}}
-  #zdz .hero-img{margin:64px auto 0;max-width:720px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(135deg,#1a0626,#0e0014 60%,#2a0d3d);position:relative;overflow:hidden;box-shadow:0 30px 80px -20px rgba(139,92,246,0.25);}
+  #zdz .hero-img{margin:40px auto 0;width:min(520px, calc(88vh * 0.5625));max-width:100%;aspect-ratio:9/16;border:1px solid var(--border);border-radius:24px;background:#000;position:relative;overflow:hidden;box-shadow:0 30px 90px -20px rgba(139,92,246,0.4),0 0 50px rgba(230,51,168,0.12);}
   #zdz .hero-img::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 30% 35%,rgba(255,255,255,0.18),transparent 60%),radial-gradient(50% 50% at 75% 65%,rgba(230,51,168,0.22),transparent 70%);z-index:1;pointer-events:none;}
   #zdz .hero-img .bust{display:block;width:100%;height:auto;opacity:.95;position:relative;z-index:0;}
   #zdz .hero-img .tag{position:absolute;left:18px;top:18px;font-family:var(--n);font-size:10px;color:#fff;letter-spacing:0.22em;opacity:.75;z-index:2;}
@@ -399,7 +399,7 @@ const STYLES = `
     #zdz .price-proof-left{flex-direction:column;align-items:flex-start;gap:12px;}
     #zdz .price-proof-btn{width:100%;justify-content:center;padding:12px 18px;}
     #zdz .port-item{width:260px;}
-    #zdz .hero-img{width:100%; margin-top:32px;}
+    #zdz .hero-img{width:100%; max-width:440px; aspect-ratio:9/16; margin:24px auto 0; border-radius:20px;}
     #zdz .marquee .row{font-size:20px; gap:24px;}
     #zdz .player-cover-play{width:42px !important;height:42px !important;box-shadow:0 0 0 5px rgba(230,51,168,0.15), 0 0 20px var(--magenta) !important;}
     #zdz .player-cover-play svg{width:18px !important;height:18px !important;margin-left:2px !important;}
@@ -426,6 +426,7 @@ const STYLES = `
     #zdz .nav-login{padding:8px 16px; font-size:10px;}
     #zdz .hd, #zdz .hs, #zdz .cyber-hs{font-size:24px;}
     #zdz .hero .hd{font-size:24px;}
+    #zdz .hero-img{width:100%; max-width:100%; aspect-ratio:9/16; margin:20px auto 0; border-radius:16px;}
     #zdz .marquee .row{font-size:14px; gap:16px;}
     #zdz .fit-head .label{font-size:25px;}
     #zdz-process-cta{font-size:8px !important; padding:14px 20px !important; width:100%; justify-content:center;}
@@ -487,18 +488,18 @@ const STYLES = `
     height: 100%;
     background: #000;
     overflow: hidden;
-    border-radius: 16px;
+    border-radius: inherit;
   }
-  #zdz wistia-player[media-id='e31bqnp5t3'] {
+  #zdz wistia-player[media-id='q70xk0gtp0'] {
     width: 100% !important;
     height: 100% !important;
     display: block;
   }
-  #zdz wistia-player[media-id='e31bqnp5t3']:not(:defined) {
-    background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/e31bqnp5t3/swatch');
+  #zdz wistia-player[media-id='q70xk0gtp0']:not(:defined) {
+    background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/q70xk0gtp0/swatch');
     display: block;
     filter: blur(5px);
-    padding-top: 56.25%;
+    padding-top: 177.78%;
   }
   #zdz .player-unmute-overlay {
     position: absolute;
@@ -1444,10 +1445,15 @@ export default function ZbrushDoZero() {
     if (!document.getElementById('wistia-media-script')) {
       const script2 = document.createElement('script');
       script2.id = 'wistia-media-script';
-      script2.src = 'https://fast.wistia.com/embed/e31bqnp5t3.js';
+      script2.src = 'https://fast.wistia.com/embed/q70xk0gtp0.js';
       script2.async = true;
       script2.type = 'module';
       document.head.appendChild(script2);
+    } else {
+      const existingScript = document.getElementById('wistia-media-script') as HTMLScriptElement;
+      if (existingScript && !existingScript.src.includes('q70xk0gtp0')) {
+        existingScript.src = 'https://fast.wistia.com/embed/q70xk0gtp0.js';
+      }
     }
 
     const attachWistiaEvents = (video: any) => {
@@ -1465,7 +1471,7 @@ export default function ZbrushDoZero() {
     // 2. Setup Wistia queue handler
     (window as any)._wq = (window as any)._wq || [];
     (window as any)._wq.push({
-      id: 'e31bqnp5t3',
+      id: 'q70xk0gtp0',
       options: {
         autoPlay: 'muted',
         silentAutoPlay: 'allow',
@@ -1480,7 +1486,7 @@ export default function ZbrushDoZero() {
     let attempts = 0;
     const checkTimer = setInterval(() => {
       attempts++;
-      const el: any = document.getElementById('wistia-hero-player') || document.querySelector('wistia-player[media-id="e31bqnp5t3"]');
+      const el: any = document.getElementById('wistia-hero-player') || document.querySelector('wistia-player[media-id="q70xk0gtp0"]');
       if (el && (el.wistiaApi || typeof el.play === 'function')) {
         attachWistiaEvents(el.wistiaApi || el);
         clearInterval(checkTimer);
@@ -1528,7 +1534,7 @@ export default function ZbrushDoZero() {
     // 1. Through Wistia queue API (most reliable)
     (window as any)._wq = (window as any)._wq || [];
     (window as any)._wq.push({
-      id: 'e31bqnp5t3',
+      id: 'q70xk0gtp0',
       onReady: (video: any) => {
         try {
           if (typeof video.unmute === 'function') video.unmute();
@@ -1546,7 +1552,7 @@ export default function ZbrushDoZero() {
 
     // 2. Through global Wistia.api
     try {
-      const wApi = (window as any).Wistia?.api?.('e31bqnp5t3') || (window as any).Wistia?.api?.('wistia-hero-player');
+      const wApi = (window as any).Wistia?.api?.('q70xk0gtp0') || (window as any).Wistia?.api?.('wistia-hero-player');
       if (wApi) {
         if (typeof wApi.unmute === 'function') wApi.unmute();
         if (typeof wApi.volume === 'function') wApi.volume(1);
@@ -1571,7 +1577,7 @@ export default function ZbrushDoZero() {
     }
 
     // 4. Through Wistia Custom Element DOM properties
-    const wistiaEl: any = document.getElementById('wistia-hero-player') || document.querySelector('wistia-player[media-id="e31bqnp5t3"]');
+    const wistiaEl: any = document.getElementById('wistia-hero-player') || document.querySelector('wistia-player[media-id="q70xk0gtp0"]');
     if (wistiaEl) {
       try {
         wistiaEl.muted = false;
@@ -1703,15 +1709,15 @@ export default function ZbrushDoZero() {
               <p className="sub rv d1">Aprenda ZBrush mesmo sem nunca ter aberto o programa. Com um passo a passo simples e organizado.</p>
               <div 
                 className="hero-img rv d2" 
-                style={{ aspectRatio: '16/9', position: 'relative', overflow: 'hidden', borderRadius: '16px', background: '#000', border: '1px solid var(--border)' }} 
+                style={{ aspectRatio: '9/16', position: 'relative', overflow: 'hidden', background: '#000' }} 
                 aria-label="ZBrush — modelos 3D"
               >
                 <div className="player-container" onTouchStart={handleTouchStart}>
                   {/* Wistia Native Player */}
                   <div className="player-iframe-wrapper">
                     <WistiaPlayer 
-                      media-id="e31bqnp5t3" 
-                      aspect="1.7777777777777777"
+                      media-id="q70xk0gtp0" 
+                      aspect="0.5625"
                       id="wistia-hero-player"
                       auto-play="muted"
                       silent-auto-play="allow"
