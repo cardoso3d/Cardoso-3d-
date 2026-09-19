@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react'
-import { Play, Pause, Volume2, VolumeX, Volume1, ChevronDown, X, Star, Quote, Sparkles, Image as ImageIcon, ZoomIn } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeX, Volume1, ChevronDown, X, Star, Quote, Sparkles, Image as ImageIcon, ZoomIn, CheckCircle2, ShieldCheck } from 'lucide-react'
 import { buildZdzCheckoutUrl } from '../utils/tracking'
 
 const WistiaPlayer = 'wistia-player' as any;
@@ -299,6 +299,79 @@ const STYLES = `
   #zdz .test-artwork-placeholder{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px; text-align:center; color:var(--muted);}
   #zdz .test-artwork-placeholder svg{width:36px; height:36px; color:var(--purpleHi); opacity:0.8;}
 
+  /* Call-to-action bar with price after testimonials */
+  #zdz .test-cta-box {
+    margin-top: 48px;
+    padding: 28px 36px;
+    background: linear-gradient(135deg, rgba(30, 10, 45, 0.8), rgba(14, 0, 20, 0.95));
+    border: 1px solid rgba(230, 51, 168, 0.3);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    flex-wrap: wrap;
+    box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.6), 0 0 30px rgba(139, 92, 246, 0.15);
+  }
+  #zdz .test-cta-price-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+  }
+  #zdz .test-cta-installments {
+    font-family: var(--n);
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  #zdz .test-cta-price {
+    font-family: var(--d);
+    font-size: 38px;
+    font-weight: 400;
+    line-height: 1;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+  #zdz .test-cta-price .accent {
+    background: linear-gradient(90deg, #e633a8 0%, #a855f7 50%, #00e5ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+  }
+  #zdz .test-cta-cash {
+    font-family: var(--n);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  #zdz .test-cta-cash strong {
+    color: #fff;
+  }
+  #zdz .test-cta-badges {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+    font-family: var(--n);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #00e5ff;
+    text-transform: uppercase;
+  }
+  #zdz .test-cta-badge-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #zdz .test-cta-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
   /* Student Gallery Carousel (Interactive Smooth Infinite Drag & Auto-Scroll) */
   #zdz .gallery-header{text-align:center; margin-top:80px; margin-bottom:36px;}
   #zdz .gallery-title{font-family:var(--n); font-size:32px; font-weight:800; text-transform:uppercase; letter-spacing:-0.01em; color:#fff;}
@@ -417,6 +490,11 @@ const STYLES = `
     #zdz .test-grid{grid-template-columns:1fr; gap:20px;}
     #zdz .test-card-main{grid-template-columns:1fr; gap:24px; padding:24px;}
     #zdz .test-card-side{padding:24px;}
+    #zdz .test-cta-box{flex-direction:column; align-items:center; text-align:center; padding:24px 20px; gap:20px; margin-top:36px;}
+    #zdz .test-cta-price-wrap{align-items:center; text-align:center;}
+    #zdz .test-cta-badges{justify-content:center;}
+    #zdz .test-cta-action{align-items:center; width:100%;}
+    #zdz .test-cta-action .btn{width:100%; justify-content:center;}
     #zdz .gallery-grid{grid-template-columns:repeat(2, 1fr); gap:16px;}
     #zdz .gallery-title{font-size:24px;}
   }
@@ -1612,7 +1690,7 @@ export default function ZbrushDoZero() {
 
   const scrollToStudents = (e?: React.MouseEvent) => {
     if (e) e.preventDefault();
-    const el = document.getElementById('zdz-depoimentos');
+    const el = document.getElementById('zdz-galeria-comunidade') || document.getElementById('zdz-depoimentos');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
@@ -1912,6 +1990,131 @@ export default function ZbrushDoZero() {
             />
           </section>
 
+          {/* Section: Prova Social - Depoimentos em Destaque */}
+          <section className="testimonials-sec" id="zdz-depoimentos">
+            <div className="w">
+              <div className="cyber-heading rv" style={{ textAlign: 'center', marginBottom: '56px' }}>
+                <div className="cyber-ey">Depoimentos reais</div>
+                <h2 className="cyber-hs">O QUE OS ALUNOS <span className="grad">ESTÃO DIZENDO</span></h2>
+              </div>
+
+              {/* Depoimentos em Destaque */}
+              <div className="test-grid rv d1">
+                {/* Card 1: Charles (Maior, com imagem do trabalho ao lado do texto) */}
+                <div className="test-card-main" id="zdz-test-card-charles">
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                        <div className="test-stars">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={16} />
+                          ))}
+                        </div>
+                        <span className="test-highlight">Evolução de 1000%</span>
+                      </div>
+
+                      <blockquote className="test-quote">
+                        "Comecei na impressão 3D há mais ou menos um ano, mas quando tentei usar o ZBrush fiquei muito frustrado. A gente fica igual cego em tiroteio quando não tem um rumo. Adquiri o curso e logo no primeiro vídeo vi que foi a coisa certa. Hoje, ao chegar no final e ver meu modelo pronto, que começou de uma esfera, ainda estou espantado com o resultado. Muita gente desiste só de abrir o programa. Eu quase desisti, mas continuei firme e já evoluí 1000%."
+                      </blockquote>
+                    </div>
+
+                    <div className="test-author">
+                      <div className="test-avatar">C</div>
+                      <div className="test-author-info">
+                        <span className="test-name">Charles</span>
+                        <span className="test-role">Aluno ZBrush do Zero</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <TestimonialArtworkBox 
+                    id="zdz-charles-artwork-preview"
+                    src="/images/alunos/charles-2.png"
+                    alt="Modelo finalizado do aluno Charles"
+                    tag="Resultado Final · Charles"
+                    title="Modelo finalizado do aluno Charles"
+                    subtitle="Esculpido no ZBrush partindo do zero · Aluno ZBrush do Zero"
+                    onImageClick={(imgSrc, title, subtitle) => openLightbox(imgSrc, title, subtitle)}
+                  />
+                </div>
+
+                {/* Card 2: Francisco (Com imagem francisco-2 do trabalho ao lado do texto) */}
+                <div className="test-card-main cyan-accent" id="zdz-test-card-francisco">
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                        <div className="test-stars">
+                          {[...Array(5)].map((_, i) => (
+                            <Star key={i} size={16} />
+                          ))}
+                        </div>
+                        <span className="test-highlight" style={{ color: '#00e5ff', background: 'rgba(0,229,255,0.1)', borderColor: 'rgba(0,229,255,0.3)' }}>Autonomia & Didática</span>
+                      </div>
+
+                      <blockquote className="test-quote">
+                        "Ganhei muito mais autonomia no processo, segurança mesmo. Antes ficava inseguro ao fazer qualquer coisa no software. Além das dicas, a didática me deu um raciocínio de pipeline e do próprio programa que me faltava antes."
+                      </blockquote>
+                    </div>
+
+                    <div className="test-author">
+                      <div className="test-avatar" style={{ background: 'linear-gradient(135deg, #00e5ff, #8b5cf6)' }}>F</div>
+                      <div className="test-author-info">
+                        <span className="test-name">Francisco</span>
+                        <span className="test-role">Aluno ZBrush do Zero</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <TestimonialArtworkBox 
+                    id="zdz-francisco-artwork-preview"
+                    src="/images/alunos/francisco-2.jpg"
+                    alt="Modelo finalizado do aluno Francisco"
+                    tag="Resultado Final · Francisco"
+                    title="Modelo finalizado do aluno Francisco"
+                    subtitle="Esculpido no ZBrush partindo do zero · Aluno ZBrush do Zero"
+                    onImageClick={(imgSrc, title, subtitle) => openLightbox(imgSrc, title, subtitle)}
+                  />
+                </div>
+              </div>
+
+              {/* Bloco de Compra com Preço ao Lado, Acesso Vitalício e 7 dias de Garantia */}
+              <div className="test-cta-box rv d2">
+                <div className="test-cta-price-wrap">
+                  <div className="test-cta-installments">
+                    Investimento especial por apenas
+                  </div>
+                  <div className="test-cta-price">
+                    <span className="accent">12x de R$ 21,42</span>
+                  </div>
+                  <div className="test-cta-cash">
+                    ou à vista por <strong>R$ 257</strong>
+                  </div>
+                  <div className="test-cta-badges">
+                    <span className="test-cta-badge-item">
+                      <CheckCircle2 size={15} color="#22c55e" /> Acesso Vitalício
+                    </span>
+                    <span style={{ opacity: 0.3 }}>•</span>
+                    <span className="test-cta-badge-item">
+                      <ShieldCheck size={15} color="#00e5ff" /> 7 dias de garantia
+                    </span>
+                  </div>
+                </div>
+
+                <div className="test-cta-action">
+                  <a 
+                    href={checkoutUrl} 
+                    className="btn" 
+                    id="zdz-testimonials-cta"
+                    onClick={handleCheckoutClick}
+                    style={{ padding: '18px 36px' }}
+                  >
+                    Quero começar agora <span className="arrow">→</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <section>
             <div className="w" style={{textAlign:'center',marginBottom:'48px'}}>
               <div className="cyber-heading rv">
@@ -2135,95 +2338,10 @@ export default function ZbrushDoZero() {
             </div>
           </section>
 
-          {/* Section: Prova Social - Depoimentos e Galeria dos Alunos */}
-          <section className="testimonials-sec" id="zdz-depoimentos">
+          {/* Section: Galeria de Imagens dos Alunos da Comunidade (Rolagem Infinita Suave) */}
+          <section className="testimonials-sec" id="zdz-galeria-comunidade" style={{ paddingTop: '40px' }}>
             <div className="w">
-              <div className="cyber-heading rv" style={{ textAlign: 'center', marginBottom: '56px' }}>
-                <div className="cyber-ey">Depoimentos reais</div>
-                <h2 className="cyber-hs">O QUE OS ALUNOS <span className="grad">ESTÃO DIZENDO</span></h2>
-              </div>
-
-              {/* PARTE 1: Depoimentos em Destaque */}
-              <div className="test-grid rv d1">
-                {/* Card 1: Charles (Maior, com imagem do trabalho ao lado do texto) */}
-                <div className="test-card-main" id="zdz-test-card-charles">
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                        <div className="test-stars">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={16} />
-                          ))}
-                        </div>
-                        <span className="test-highlight">Evolução de 1000%</span>
-                      </div>
-
-                      <blockquote className="test-quote">
-                        "Comecei na impressão 3D há mais ou menos um ano, mas quando tentei usar o ZBrush fiquei muito frustrado. A gente fica igual cego em tiroteio quando não tem um rumo. Adquiri o curso e logo no primeiro vídeo vi que foi a coisa certa. Hoje, ao chegar no final e ver meu modelo pronto, que começou de uma esfera, ainda estou espantado com o resultado. Muita gente desiste só de abrir o programa. Eu quase desisti, mas continuei firme e já evoluí 1000%."
-                      </blockquote>
-                    </div>
-
-                    <div className="test-author">
-                      <div className="test-avatar">C</div>
-                      <div className="test-author-info">
-                        <span className="test-name">Charles</span>
-                        <span className="test-role">Aluno ZBrush do Zero</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <TestimonialArtworkBox 
-                    id="zdz-charles-artwork-preview"
-                    src="/images/alunos/charles-2.png"
-                    alt="Modelo finalizado do aluno Charles"
-                    tag="Resultado Final · Charles"
-                    title="Modelo finalizado do aluno Charles"
-                    subtitle="Esculpido no ZBrush partindo do zero · Aluno ZBrush do Zero"
-                    onImageClick={(imgSrc, title, subtitle) => openLightbox(imgSrc, title, subtitle)}
-                  />
-                </div>
-
-                {/* Card 2: Francisco (Com imagem francisco-2 do trabalho ao lado do texto) */}
-                <div className="test-card-main cyan-accent" id="zdz-test-card-francisco">
-                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                        <div className="test-stars">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} size={16} />
-                          ))}
-                        </div>
-                        <span className="test-highlight" style={{ color: '#00e5ff', background: 'rgba(0,229,255,0.1)', borderColor: 'rgba(0,229,255,0.3)' }}>Autonomia & Didática</span>
-                      </div>
-
-                      <blockquote className="test-quote">
-                        "Ganhei muito mais autonomia no processo, segurança mesmo. Antes ficava inseguro ao fazer qualquer coisa no software. Além das dicas, a didática me deu um raciocínio de pipeline e do próprio programa que me faltava antes."
-                      </blockquote>
-                    </div>
-
-                    <div className="test-author">
-                      <div className="test-avatar" style={{ background: 'linear-gradient(135deg, #00e5ff, #8b5cf6)' }}>F</div>
-                      <div className="test-author-info">
-                        <span className="test-name">Francisco</span>
-                        <span className="test-role">Aluno ZBrush do Zero</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <TestimonialArtworkBox 
-                    id="zdz-francisco-artwork-preview"
-                    src="/images/alunos/francisco-2.jpg"
-                    alt="Modelo finalizado do aluno Francisco"
-                    tag="Resultado Final · Francisco"
-                    title="Modelo finalizado do aluno Francisco"
-                    subtitle="Esculpido no ZBrush partindo do zero · Aluno ZBrush do Zero"
-                    onImageClick={(imgSrc, title, subtitle) => openLightbox(imgSrc, title, subtitle)}
-                  />
-                </div>
-              </div>
-
-              {/* PARTE 2: Galeria de Imagens dos Alunos (Rolagem Infinita Suave) */}
-              <div className="gallery-header rv d2">
+              <div className="gallery-header rv d2" style={{ marginTop: '20px' }}>
                 <div className="ey" style={{ marginBottom: '8px' }}>Galeria da Comunidade</div>
                 <h3 className="gallery-title">
                   Feito por alunos <span className="grad" style={{ background: 'linear-gradient(90deg,#e633a8,#00e5ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>do zero</span>
