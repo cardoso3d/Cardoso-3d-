@@ -44,6 +44,8 @@ export default function ProductCard({ id, title, description, features, image, f
         <img 
           src={imgSrc} 
           alt={title} 
+          loading="lazy"
+          decoding="async"
           referrerPolicy="no-referrer"
           onError={() => {
             if (fallbackImage && imgSrc !== fallbackImage) {

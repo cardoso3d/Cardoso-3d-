@@ -1159,7 +1159,7 @@ export default function ThreeDnaPose() {
                     <div className="mod-body">
                       <div className="mod-body-inner">
                         <div className="mod-img-wrap">
-                          <img src={m.img} alt={m.t} draggable="false" />
+                          <img src={m.img} alt={m.t} draggable="false" loading="lazy" decoding="async" />
                         </div>
                         <div className="mod-content-right">
                           <div className="mod-desc">{m.d}</div>
@@ -1229,7 +1229,7 @@ export default function ThreeDnaPose() {
                         style={{ textDecoration: 'none', color: 'inherit' }}
                       >
                         <div className="test-avatar">
-                          <img src={t.avatar} alt={t.name} draggable="false" />
+                          <img src={t.avatar} alt={t.name} draggable="false" loading="lazy" decoding="async" />
                         </div>
                         <div>
                           <div className="test-name">{t.name}</div>
@@ -1286,6 +1286,8 @@ export default function ThreeDnaPose() {
                               src={item.avatar}
                               alt={item.user}
                               draggable="false"
+                              loading="lazy"
+                              decoding="async"
                             />
                             <span>{item.user}</span>
                           </a>
@@ -1295,6 +1297,8 @@ export default function ThreeDnaPose() {
                                 src={item.imgBefore}
                                 alt="Antes"
                                 draggable="false"
+                                loading="lazy"
+                                decoding="async"
                               />
                               <div
                                 className="bna-tag"
@@ -1311,6 +1315,8 @@ export default function ThreeDnaPose() {
                                 src={item.imgAfter}
                                 alt="Depois"
                                 draggable="false"
+                                loading="lazy"
+                                decoding="async"
                               />
                               <div
                                 className="bna-tag"
@@ -1366,6 +1372,8 @@ export default function ThreeDnaPose() {
                     <img
                       src="https://3dnapose.com/wp-content/uploads/2025/11/fotinha-do-vini-2.png"
                       alt="Vinícius Cardoso"
+                      loading="lazy"
+                      decoding="async"
                     />
                     <div className="about-badge">
                       Modelador 3D • Fundador Polymind Studio

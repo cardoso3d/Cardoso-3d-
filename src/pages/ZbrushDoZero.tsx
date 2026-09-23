@@ -724,14 +724,14 @@ interface AuthorPortfolioItem {
 }
 
 const zdzAuthorPortfolio: AuthorPortfolioItem[] = [
-  { img: "/images/trabalhos-vini/spiderman.jpg", title: "Spider-Man", category: "Modelado para a Polymind Studio" },
-  { img: "/images/trabalhos-vini/dr. doom.jpg", title: "Dr. Doom", category: "Modelado para a Polymind Studio" },
-  { img: "/images/trabalhos-vini/venom.jpg", title: "Venom", category: "Modelado para a Polymind Studio" },
-  { img: "/images/trabalhos-vini/conan.jpg", title: "Conan", category: "Modelado para a Polymind Studio" },
-  { img: "/images/trabalhos-vini/quartetofantastic.jpg", title: "Quarteto Fantástico", category: "Modelado para a Polymind Studio" },
-  { img: "/images/trabalhos-vini/electro.jpg", title: "Electro", category: "Modelado para a Polymind Studio" },
-  { img: "/images/trabalhos-vini/spider punk.jpg", title: "Spider-Punk", category: "Modelado para a Red Sparrow Studio" },
-  { img: "/images/trabalhos-vini/mysterio.jpg", title: "Mysterio", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos/spiderman_1.webp", title: "Spider-Man", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos/dr-doom_1.webp", title: "Dr. Doom", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos/venom_1.webp", title: "Venom", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos/conan_1.webp", title: "Conan", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos/quarteto-fantastico_1.webp", title: "Quarteto Fantástico", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos/electro_1.webp", title: "Electro", category: "Modelado para a Polymind Studio" },
+  { img: "/images/trabalhos/spider-punk_1.webp", title: "Spider-Punk", category: "Modelado para a Red Sparrow Studio" },
+  { img: "/images/trabalhos/mysterio_1.webp", title: "Mysterio", category: "Modelado para a Polymind Studio" },
 ];
 
 const portImgs = zdzAuthorPortfolio.map(p => p.img);
@@ -871,6 +871,7 @@ function StudentImageFrame({
           src={src} 
           alt={alt} 
           loading="lazy" 
+          decoding="async"
           onError={() => setHasError(true)}
         />
       ) : (
@@ -1434,6 +1435,7 @@ function TestimonialArtworkBox({
             src={src} 
             alt={alt} 
             loading="lazy" 
+            decoding="async"
             onError={() => setHasError(true)} 
           />
           <div className="zoom-badge">
@@ -1512,27 +1514,9 @@ export default function ZbrushDoZero() {
   }, []);
 
   useEffect(() => {
-    // 1. Load Wistia scripts
-    if (!document.getElementById('wistia-player-script')) {
-      const script1 = document.createElement('script');
-      script1.id = 'wistia-player-script';
-      script1.src = 'https://fast.wistia.com/player.js';
-      script1.async = true;
-      document.head.appendChild(script1);
-    }
-    if (!document.getElementById('wistia-media-script')) {
-      const script2 = document.createElement('script');
-      script2.id = 'wistia-media-script';
-      script2.src = 'https://fast.wistia.com/embed/q70xk0gtp0.js';
-      script2.async = true;
-      script2.type = 'module';
-      document.head.appendChild(script2);
-    } else {
-      const existingScript = document.getElementById('wistia-media-script') as HTMLScriptElement;
-      if (existingScript && !existingScript.src.includes('q70xk0gtp0')) {
-        existingScript.src = 'https://fast.wistia.com/embed/q70xk0gtp0.js';
-      }
-    }
+    let checkTimer: any = null;
+    let idleId: any = null;
+    let timeoutId: any = null;
 
     const attachWistiaEvents = (video: any) => {
       if (!video) return;
@@ -1546,7 +1530,7 @@ export default function ZbrushDoZero() {
       }
     };
 
-    // 2. Setup Wistia queue handler
+    // 1. Setup Wistia queue handler immediately so callbacks are registered
     (window as any)._wq = (window as any)._wq || [];
     (window as any)._wq.push({
       id: 'q70xk0gtp0',
@@ -1560,22 +1544,59 @@ export default function ZbrushDoZero() {
       }
     });
 
-    // 3. One-time fallback check for wistia custom element in DOM
-    let attempts = 0;
-    const checkTimer = setInterval(() => {
-      attempts++;
-      const el: any = document.getElementById('wistia-hero-player') || document.querySelector('wistia-player[media-id="q70xk0gtp0"]');
-      if (el && (el.wistiaApi || typeof el.play === 'function')) {
-        attachWistiaEvents(el.wistiaApi || el);
-        clearInterval(checkTimer);
+    // 2. Load Wistia scripts asynchronously and non-blockingly
+    const loadWistiaScripts = () => {
+      if (!document.getElementById('wistia-player-script')) {
+        const script1 = document.createElement('script');
+        script1.id = 'wistia-player-script';
+        script1.src = 'https://fast.wistia.com/player.js';
+        script1.async = true;
+        script1.defer = true;
+        document.head.appendChild(script1);
       }
-      if (attempts > 12) {
-        clearInterval(checkTimer);
+      if (!document.getElementById('wistia-media-script')) {
+        const script2 = document.createElement('script');
+        script2.id = 'wistia-media-script';
+        script2.src = 'https://fast.wistia.com/embed/q70xk0gtp0.js';
+        script2.async = true;
+        script2.defer = true;
+        script2.type = 'module';
+        document.head.appendChild(script2);
+      } else {
+        const existingScript = document.getElementById('wistia-media-script') as HTMLScriptElement;
+        if (existingScript && !existingScript.src.includes('q70xk0gtp0')) {
+          existingScript.src = 'https://fast.wistia.com/embed/q70xk0gtp0.js';
+        }
       }
-    }, 400);
+
+      // Check for wistia custom element in DOM
+      let attempts = 0;
+      checkTimer = setInterval(() => {
+        attempts++;
+        const el: any = document.getElementById('wistia-hero-player') || document.querySelector('wistia-player[media-id="q70xk0gtp0"]');
+        if (el && (el.wistiaApi || typeof el.play === 'function')) {
+          attachWistiaEvents(el.wistiaApi || el);
+          clearInterval(checkTimer);
+        }
+        if (attempts > 15) {
+          clearInterval(checkTimer);
+        }
+      }, 400);
+    };
+
+    // Defer loading non-blockingly so the rest of the page paints without delay
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      idleId = (window as any).requestIdleCallback(loadWistiaScripts, { timeout: 1200 });
+    } else {
+      timeoutId = setTimeout(loadWistiaScripts, 50);
+    }
 
     return () => {
-      clearInterval(checkTimer);
+      if (checkTimer) clearInterval(checkTimer);
+      if (timeoutId) clearTimeout(timeoutId);
+      if (idleId && typeof window !== 'undefined' && 'cancelIdleCallback' in window) {
+        (window as any).cancelIdleCallback(idleId);
+      }
     };
   }, []);
 
@@ -2171,7 +2192,7 @@ export default function ZbrushDoZero() {
                       }}
                     >
                       <div className="module-art">
-                        <img src={m.img} alt={m.title} loading="lazy" />
+                        <img src={m.img} alt={m.title} loading="lazy" decoding="async" />
                       </div>
                       
                       <div className="module-foot">
@@ -2312,7 +2333,7 @@ export default function ZbrushDoZero() {
                             }
                           }}
                         >
-                          <img src={student.image} alt={`Trabalho de ${student.name}`} loading="lazy" />
+                          <img src={student.image} alt={`Trabalho de ${student.name}`} loading="lazy" decoding="async" />
                         </div>
                       ))}
                     </div>
